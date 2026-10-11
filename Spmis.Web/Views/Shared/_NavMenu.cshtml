@@ -1,0 +1,36 @@
+﻿@using Spmis.Web.Data.Auth
+
+@if (User.Identity?.IsAuthenticated == true)
+{
+    <ul class="navbar-nav flex-grow-1">
+        @if (User.IsInRole(RoleNames.Administrator))
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-controller="Admin" asp-action="Index">Administration</a>
+            </li>
+        }
+        @if (User.IsInRole(RoleNames.ProgramHead))
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-controller="ProgramHead" asp-action="Index">Program Head</a>
+            </li>
+        }
+        @if (User.IsInRole(RoleNames.Faculty))
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-controller="Faculty" asp-action="Index">My Classes</a>
+            </li>
+        }
+        @if (User.IsInRole(RoleNames.Student))
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-controller="Student" asp-action="Index">My Grades</a>
+            </li>
+        }
+    </ul>
+
+    <form asp-controller="Account" asp-action="Logout" method="post" class="d-flex align-items-center">
+        <span class="navbar-text me-3">@User.Identity.Name</span>
+        <button type="submit" class="btn btn-outline-secondary btn-sm">Sign out</button>
+    </form>
+}

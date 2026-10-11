@@ -1,0 +1,57 @@
+﻿@model ReasonDialogViewModel
+@{
+    var hasError = Model.ReasonError is not null || Model.DetailsError is not null;
+}
+
+<div class="modal fade" id="reasonModal" tabindex="-1" aria-labelledby="reasonModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reasonModalLabel">Reason for this change</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="Reason_ReasonId" class="form-label">Reason</label>
+                    <select id="Reason_ReasonId" name="Reason.ReasonId" form="@Model.FormId" class="form-select">
+                        <option value="">Choose a reason...</option>
+                        @foreach (var option in Model.Options)
+                        {
+                            <option value="@option.Id" selected="@(Model.Selected.ReasonId == option.Id)">@option.Text</option>
+                        }
+                    </select>
+                    @if (Model.ReasonError is not null)
+                    {
+                        <div class="text-danger">@Model.ReasonError</div>
+                    }
+                </div>
+
+                <div class="mb-3">
+                    <label for="Reason_Details" class="form-label">Details</label>
+                    <textarea id="Reason_Details" name="Reason.Details" form="@Model.FormId" class="form-control" rows="3" maxlength="400">@Model.Selected.Details</textarea>
+                    <div class="form-text">Required when you choose "Other".</div>
+                    @if (Model.DetailsError is not null)
+                    {
+                        <div class="text-danger">@Model.DetailsError</div>
+                    }
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="@Model.FormId" class="btn btn-primary">Confirm and save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (hasError)
+{
+    <script>
+        // The server rejected the reason: reopen the dialog so the user sees why.
+        document.addEventListener('DOMContentLoaded', function () {
+            new bootstrap.Modal(document.getElementById('reasonModal')).show();
+        });
+    </script>
+}

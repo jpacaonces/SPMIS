@@ -1,0 +1,15 @@
+﻿@model int
+@{
+    ViewData["Title"] = "Error " + Model;
+    var (title, message) = Model switch
+    {
+        404 => ("Page not found", "The page you asked for does not exist."),
+        403 => ("Access denied", "You do not have permission to view this page."),
+        401 => ("Sign in required", "Please sign in to continue."),
+        _ => ("Request failed", "The request could not be completed.")
+    };
+}
+
+<h1 class="h3">@title</h1>
+<p>@message</p>
+<a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Back to home</a>

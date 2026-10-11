@@ -4,10 +4,19 @@ using Microting.EntityFrameworkCore.MySql.Infrastructure;
 using Spmis.Web.Data;
 using Spmis.Web.Data.Auth;
 using Spmis.Web.Data.Entities;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using Spmis.Web.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
+// Secure by default: every controller action requires a signed-in user.
+// Public pages must opt out with [AllowAnonymous].
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add(new AuthorizeFilter());
+});
 
 // ---- Database (added in Step 3b) -------------------------------------
 // The connection string comes from user secrets (not from source code).
@@ -48,7 +57,12 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
-// -----------------------------------------------------------------------
+// ---- Services (added in Step 5) --------------------------------------
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, CurrentUser>();
+builder.Services.AddScoped<IAuditLogger, AuditLogger>();
+
+builder.Services.AddScoped<IReasonService, ReasonService>();
 
 var app = builder.Build();
 
@@ -57,6 +71,9 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
+
+// Friendly pages for 404, 403 and similar (re-runs the request to our action).
+app.UseStatusCodePagesWithReExecute("/Home/HttpStatus", "?code={0}");
 
 app.UseHttpsRedirection();
 app.UseRouting();
