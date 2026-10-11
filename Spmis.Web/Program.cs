@@ -71,14 +71,12 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
-// ---- TEMPORARY startup check (remove in Step 3c) ---------------------
-using (var scope = app.Services.CreateScope())
+// ---- Development only: seed one shared dev password (Step 3c) --------
+if (app.Environment.IsDevelopment())
 {
-    var identityDb = scope.ServiceProvider.GetRequiredService<AppIdentityDbContext>();
-    var businessDb = scope.ServiceProvider.GetRequiredService<SpmisDbContext>();
-    Console.WriteLine($"[TEMP] users via Identity context:    {identityDb.Users.Count()}");
-    Console.WriteLine($"[TEMP] roles via Identity context:    {identityDb.Roles.Count()}");
-    Console.WriteLine($"[TEMP] students via business context: {businessDb.Students.Count()}");
+    using var scope = app.Services.CreateScope();
+    await DevPasswordSeeder.RunAsync(
+        scope.ServiceProvider, app.Configuration, app.Logger);
 }
 // -----------------------------------------------------------------------
 
