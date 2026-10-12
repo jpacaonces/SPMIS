@@ -99,3 +99,7 @@ else
 <a asp-action="Index" class="btn btn-outline-secondary">Back to my classes</a>
 <a class="btn btn-outline-primary" asp-controller="Assessments" asp-action="Index"
    asp-route-id="@Model.ClassOfferingId">Assessments</a>
+<a class="btn btn-outline-primary" asp-controller="Meetings" asp-action="Index"
+   asp-route-id="@Model.ClassOfferingId">Meetings</a>
+<a class="btn btn-outline-danger" asp-controller="Finalize" asp-action="Review"
+   asp-route-id="@Model.ClassOfferingId">Finalize</a>

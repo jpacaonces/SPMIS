@@ -1,0 +1,46 @@
+﻿@model Spmis.Web.Models.Portal.MyClassesViewModel
+@{ ViewData["Title"] = "My grades"; }
+
+<h2>My grades</h2>
+@if (Model.TermLabel is not null) { <p class="text-muted">@Model.TermLabel</p> }
+@if (Model.Message is not null) { <div class="alert alert-warning">@Model.Message</div> }
+
+@if (!Model.Items.Any() && Model.Message is null)
+{
+    <p>You are not enrolled in any class this term.</p>
+}
+else if (Model.Items.Any())
+{
+    <table class="table">
+        <thead>
+            <tr><th>Subject</th><th>Teacher</th><th class="text-end">Grade</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody>
+        @foreach (var i in Model.Items)
+        {
+            <tr>
+                <td>@i.SubjectCode<br /><small class="text-muted">@i.SubjectTitle</small></td>
+                <td>@i.FacultyName</td>
+                <td class="text-end">
+                    @if (i.ReportedGrade is not null)
+                    {
+                        <span class="@(i.IsPassing == true ? "" : "text-danger")">@i.ReportedGrade.Value.ToString("0.00")</span>
+                        <br /><small class="text-muted">@i.RawGrade?.ToString("0.00")</small>
+                    }
+                    else { <span class="text-muted">—</span> }
+                </td>
+                <td>
+                    @if (i.Status == "Final") { <span class="badge bg-success">Final</span> }
+                    else if (i.Status == "Provisional") { <span class="badge bg-warning text-dark">Estimate</span> }
+                    else { <span class="badge bg-secondary">No data yet</span> }
+                    @if (i.IsFinalized) { <span class="badge bg-dark">Locked</span> }
+                </td>
+                <td><a asp-action="Show" asp-route-id="@i.EnrollmentId">Details</a></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    <p class="small text-muted">
+        An estimate is an average of the periods graded so far. It can change until every period is complete.
+    </p>
+}

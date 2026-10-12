@@ -91,6 +91,10 @@ public class AccountController : Controller
 
         await _signInManager.SignInAsync(user, isPersistent: model.RememberMe);
 
+        // A flagged account must choose a new password first.
+        if (user.MustChangePassword)
+            return RedirectToAction(nameof(ChangePassword));
+
         if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
             return LocalRedirect(model.ReturnUrl);
 
@@ -106,6 +110,55 @@ public class AccountController : Controller
     }
 
     [AllowAnonymous]
+    [HttpGet]
+    public async Task<IActionResult> ChangePassword()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user is null) return RedirectToAction(nameof(Login));
+
+        ViewBag.Forced = user.MustChangePassword;
+        return View(new ChangePasswordViewModel());
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user is null) return RedirectToAction(nameof(Login));
+
+        ViewBag.Forced = user.MustChangePassword;
+        if (!ModelState.IsValid) return View(model);
+
+        if (model.NewPassword == model.CurrentPassword)
+        {
+            ModelState.AddModelError(nameof(model.NewPassword),
+                "The new password must be different from the current one.");
+            return View(model);
+        }
+
+        // Flag and new hash are saved together by ChangePasswordAsync (one update).
+        // If the password is refused, nothing is saved and the flag stays on.
+        user.MustChangePassword = false;
+        var result = await _userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+        if (!result.Succeeded)
+        {
+            foreach (var error in result.Errors)
+                ModelState.AddModelError(string.Empty, error.Description);
+            return View(model);
+        }
+
+        var roles = await _userManager.GetRolesAsync(user);
+        await _audit.AddAndSaveAsync("PasswordChanged", "User", user.Id.ToString(),
+            actingUserId: user.Id, actingRole: roles.FirstOrDefault());
+
+        // The security stamp changed, so re-issue this person's sign-in cookie.
+        await _signInManager.RefreshSignInAsync(user);
+
+        ViewBag.Forced = false;
+        ViewBag.Done = true;
+        return View(new ChangePasswordViewModel());
+    }
     public IActionResult AccessDenied()
     {
         return View();

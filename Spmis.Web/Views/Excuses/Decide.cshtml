@@ -1,0 +1,79 @@
+﻿@model Spmis.Web.Models.ClassRecord.ExcuseDecideViewModel
+@{ ViewData["Title"] = "Excuse letter"; var pending = Model.Status == "Pending"; }
+
+<h2>Excuse letter</h2>
+<p class="text-muted">@Model.Header</p>
+
+<dl class="row">
+    <dt class="col-sm-3">Student</dt><dd class="col-sm-9">@Model.StudentNo · @Model.StudentName</dd>
+    <dt class="col-sm-3">Dates covered</dt>
+    <dd class="col-sm-9">@Model.DateFrom.ToString("yyyy-MM-dd") to @Model.DateTo.ToString("yyyy-MM-dd")</dd>
+    <dt class="col-sm-3">Reason given</dt><dd class="col-sm-9">@Model.LetterReason</dd>
+    <dt class="col-sm-3">Guardian</dt>
+    <dd class="col-sm-9">@Model.GuardianName (@Model.GuardianRelationship)</dd>
+    <dt class="col-sm-3">Signed by</dt><dd class="col-sm-9">@Model.SignatoryName</dd>
+    <dt class="col-sm-3">Attached file</dt>
+    <dd class="col-sm-9"><a asp-action="Download" asp-route-id="@Model.DecisionId">@Model.FileName</a></dd>
+    <dt class="col-sm-3">Submitted</dt><dd class="col-sm-9">@Model.SubmittedAt.ToString("yyyy-MM-dd HH:mm")</dd>
+    <dt class="col-sm-3">Status</dt><dd class="col-sm-9">@Model.Status</dd>
+    @if (!pending)
+    {
+        <dt class="col-sm-3">Decision reason</dt><dd class="col-sm-9">@Model.DecisionReason</dd>
+        <dt class="col-sm-3">Decided</dt><dd class="col-sm-9">@Model.DecidedAt?.ToString("yyyy-MM-dd HH:mm")</dd>
+    }
+</dl>
+
+<h5>Meetings of this class inside those dates</h5>
+@if (!Model.Meetings.Any())
+{
+    <p>None.</p>
+}
+else
+{
+    <table class="table table-sm w-auto">
+        <thead><tr><th>Date</th><th>Topic</th><th>Current mark</th></tr></thead>
+        <tbody>
+        @foreach (var m in Model.Meetings)
+        {
+            <tr><td>@m.Date.ToString("yyyy-MM-dd")</td><td>@m.Topic</td><td>@m.Mark</td></tr>
+        }
+        </tbody>
+    </table>
+}
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+@if (pending)
+{
+    <form id="excuseForm" asp-action="Decide" method="post">
+        <input type="hidden" name="DecisionId" value="@Model.DecisionId" />
+
+        <div class="mb-3">
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="Approve" id="appr" value="true"
+                       checked="@(Model.Approve == true)" />
+                <label class="form-check-label" for="appr">Approve</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="Approve" id="rej" value="false"
+                       checked="@(Model.Approve == false)" />
+                <label class="form-check-label" for="rej">Reject</label>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reasonModal">
+            Record decision</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
+    </form>
+
+    @await Component.InvokeAsync("ReasonDialog", new
+    {
+        context = "ExcuseDecision",
+        formId = "excuseForm",
+        selected = Model.Reason
+    })
+}
+else
+{
+    <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
+}

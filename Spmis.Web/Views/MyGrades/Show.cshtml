@@ -1,0 +1,121 @@
+﻿@using Spmis.Web.Grading
+@model Spmis.Web.Models.Portal.MyClassDetailViewModel
+@{
+    ViewData["Title"] = "Class grades";
+    string PeriodName(string code) => code switch
+    {
+        "PRELIM" => "Prelim", "MIDTERM" => "Midterm", "PREFINAL" => "Pre-Final", "FINAL" => "Final", _ => code
+    };
+}
+
+<h2>@Model.Header</h2>
+   @if (!Model.IsFinalized)
+   {
+       <a class="btn btn-outline-primary btn-sm mb-3" asp-controller="WhatIf" asp-action="Show" asp-route-id="@Model.EnrollmentId">What if…?</a>
+   }
+<p class="text-muted">@Model.FacultyName · @Model.AttendanceMode attendance</p>
+
+<div class="card mb-4">
+    <div class="card-body">
+        @if (Model.ReportedGrade is not null)
+        {
+            <div class="display-6 @(Model.IsPassing == true ? "" : "text-danger")">
+                @Model.ReportedGrade.Value.ToString("0.00")
+            </div>
+            <div>Semester raw grade: @Model.RawGrade?.ToString("0.00")</div>
+        }
+        else
+        {
+            <div class="display-6 text-muted">—</div>
+        }
+        <div class="mt-2">
+            @if (Model.Status == "Final") { <span class="badge bg-success">Final</span> }
+            else if (Model.Status == "Provisional") { <span class="badge bg-warning text-dark">Estimate</span> }
+            else { <span class="badge bg-secondary">No data yet</span> }
+            @if (Model.IsFinalized) { <span class="badge bg-dark">Locked</span> }
+        </div>
+        @if (Model.Status == "Provisional")
+        {
+            <p class="small text-muted mb-0 mt-2">
+                This is an estimate: the average of the periods graded so far. It can change.
+            </p>
+        }
+    </div>
+</div>
+
+@foreach (var p in Model.Periods)
+{
+    <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between">
+            <strong>@PeriodName(p.Code)</strong>
+            <span>
+                @if (p.RawGrade is not null)
+                {
+                    <span>@p.RawGrade.Value.ToString("0.00")</span>
+                    @if (p.Status == PeriodStatus.Provisional) { <small class="text-muted">(estimate, no major exam yet)</small> }
+                }
+                else { <span class="text-muted">no data yet</span> }
+            </span>
+        </div>
+        <div class="card-body">
+            <p class="small text-muted">
+                Class standing: @(p.ClassStandingPercent?.ToString("0.00") ?? "—")% ·
+                Major exam: @(p.MajorExamPercent?.ToString("0.00") ?? "—")%
+            </p>
+            @foreach (var c in p.Components)
+            {
+                <div class="mb-2">
+                    <strong>@c.Name</strong>
+                    <span class="ms-2">@(c.Percent?.ToString("0.00") ?? "—")%</span>
+                    <span class="small text-muted ms-2">
+                        (@c.EarnedPoints.ToString("0.##") / @c.MaxPoints.ToString("0.##") points)
+                    </span>
+                    @if (c.Items.Any())
+                    {
+                        <ul class="small mb-1">
+                            @foreach (var i in c.Items)
+                            {
+                                <li class="@(i.Counted ? "" : "text-muted")">
+                                    @i.Title: @i.Earned.ToString("0.##") / @i.Max.ToString("0.##")
+                                    @if (i.LateDays > 0) { <span> · late @i.LateDays day(s)</span> }
+                                    @if (!string.IsNullOrEmpty(i.Note)) { <span> · @i.Note</span> }
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@if (Model.AttendanceMode == "Meetings")
+{
+    <h5 class="mt-4">Attendance</h5>
+    @if (!Model.Attendance.Any())
+    {
+        <p>No meetings held yet.</p>
+    }
+    else
+    {
+        <table class="table table-sm w-auto">
+            <thead><tr><th>Date</th><th>Topic</th><th>Mark</th></tr></thead>
+            <tbody>
+            @foreach (var a in Model.Attendance)
+            {
+                <tr>
+                    <td>@a.Date.ToString("yyyy-MM-dd")</td>
+                    <td>@a.Topic</td>
+                    <td>@a.Mark@(a.ExcusedByLetter ? " (excused by letter)" : "")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+}
+else
+{
+    <p class="small text-muted">Attendance in this class comes from your activity scores.</p>
+}
+
+<a class="btn btn-outline-secondary" asp-action="Index">Back to my grades</a>

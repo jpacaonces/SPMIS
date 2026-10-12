@@ -207,7 +207,8 @@ public class UserAdminService : IUserAdminService
             FirstName = model.FirstName.Trim(),
             MiddleName = string.IsNullOrWhiteSpace(model.MiddleName) ? null : model.MiddleName.Trim(),
             LastName = model.LastName.Trim(),
-            IsActive = true
+            IsActive = true,
+            MustChangePassword = true   // the admin chose this password; the person must replace it
         };
 
         user.Roles.Add(role!);
@@ -738,6 +739,8 @@ public class UserAdminService : IUserAdminService
             return FailUpdate("Reason.ReasonId", reason.Error!);
 
         user.PasswordHash = _userManager.PasswordHasher.HashPassword(tempUser, model.Password);
+        user.PasswordHash = _userManager.PasswordHasher.HashPassword(tempUser, model.Password);
+        user.MustChangePassword = true;   // an admin knows this password, so the person must replace it
 
         // End every existing session, and clear any lockout so the person
         // can sign in with the new password straight away.

@@ -1,0 +1,43 @@
+﻿@model Spmis.Web.Models.ClassRecord.MeetingStatusViewModel
+@{
+    var cancelling = !Model.Activate;
+    ViewData["Title"] = cancelling ? "Cancel meeting" : "Reactivate meeting";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<dl class="row">
+    <dt class="col-sm-2">Date</dt>
+    <dd class="col-sm-10">@Model.Date.ToString("yyyy-MM-dd")</dd>
+    <dt class="col-sm-2">Topic</dt>
+    <dd class="col-sm-10">@Model.Topic</dd>
+    <dt class="col-sm-2">Attendance rows</dt>
+    <dd class="col-sm-10">@Model.RecordCount</dd>
+    <dt class="col-sm-2">Status</dt>
+    <dd class="col-sm-10">@(Model.IsActive ? "Held" : "Cancelled")</dd>
+</dl>
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+@if (cancelling)
+{
+    <p>A cancelled meeting is left out of every attendance percentage. Nothing is deleted and it can be reactivated.</p>
+}
+
+<form id="meetingForm" asp-action="Status" method="post">
+    <input type="hidden" name="MeetingId" value="@Model.MeetingId" />
+    <input type="hidden" name="Activate" value="@(Model.Activate ? "true" : "false")" />
+
+    <button type="button" class="btn @(cancelling ? "btn-danger" : "btn-success")"
+            data-bs-toggle="modal" data-bs-target="#reasonModal">
+        @(cancelling ? "Cancel meeting" : "Reactivate meeting")
+    </button>
+    <a asp-action="Index" asp-route-id="@Model.ClassOfferingId" class="btn btn-outline-secondary">Back</a>
+</form>
+
+@await Component.InvokeAsync("ReasonDialog", new
+{
+    context = cancelling ? "Deactivate" : "Reactivate",
+    formId = "meetingForm",
+    selected = Model.Reason
+})

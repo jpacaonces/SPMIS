@@ -1,0 +1,107 @@
+﻿@model Spmis.Web.Models.ClassRecord.FinalizeReviewViewModel
+@{ ViewData["Title"] = "Finalize class"; }
+
+<h2>Finalize class</h2>
+<p class="text-muted">@Model.Header</p>
+
+@if (TempData["Success"] is string ok) { <div class="alert alert-success">@ok</div> }
+@if (TempData["Error"] is string err) { <div class="alert alert-danger">@err</div> }
+
+@if (Model.IsFinalized)
+{
+    <div class="alert alert-secondary">
+        This class was finalized@(Model.FinalizedAt is null ? "" : " on " + Model.FinalizedAt.Value.ToString("yyyy-MM-dd HH:mm")).
+        The grades below are the saved final grades and can no longer be changed.
+    </div>
+}
+else if (Model.Blockers.Any())
+{
+    <div class="alert alert-warning">
+        <strong>This class cannot be finalized yet:</strong>
+        <ul class="mb-0">
+            @foreach (var b in Model.Blockers) { <li>@b</li> }
+        </ul>
+    </div>
+}
+else
+{
+    <div class="alert alert-info">
+        Every student has a complete grade. Review it, then finalize.
+    </div>
+}
+
+<table class="table table-sm">
+    <thead>
+        <tr><th>Student no.</th><th>Name</th><th class="text-end">Semester raw</th>
+            <th class="text-end">Grade</th><th>Result</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+    @foreach (var r in Model.Rows)
+    {
+        <tr>
+            <td>@r.StudentNo</td>
+            <td>@r.StudentName</td>
+            <td class="text-end">@(r.RawGrade?.ToString("0.00") ?? "—")</td>
+            <td class="text-end">@(r.ReportedGrade?.ToString("0.00") ?? "—")</td>
+            <td>
+                @if (r.IsPassing == true) { <span class="text-success">Passed</span> }
+                else if (r.IsPassing == false) { <span class="text-danger">Not passed</span> }
+            </td>
+            <td>@r.Status</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<a class="btn btn-outline-secondary" asp-controller="ClassRecord" asp-action="Show"
+   asp-route-id="@Model.ClassOfferingId">Back to class record</a>
+
+@if (Model.CanFinalize)
+{
+    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#finalizeModal">
+        Finalize class…
+    </button>
+
+    <div class="modal fade" id="finalizeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form class="modal-content" asp-action="Confirm" asp-route-id="@Model.ClassOfferingId" method="post">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Are you absolutely sure?</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Finalizing cannot be undone. There is no turning back.</strong></p>
+                    <p>
+                        The grades of @Model.Rows.Count student(s) will be saved permanently, and this
+                        class will be locked: scores, attendance, assessments, meetings and excuse
+                        decisions can no longer be added or changed by anyone.
+                    </p>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="confirmed" value="true" id="sure" />
+                        <label class="form-check-label" for="sure">
+                            I understand this cannot be undone.
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger" id="finalizeBtn" disabled>
+                        Yes, finalize this class
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+
+@section Scripts {
+<script>
+    // Convenience only: the SERVER also requires the confirmation.
+    var sure = document.getElementById('sure');
+    if (sure) {
+        sure.addEventListener('change', function () {
+            document.getElementById('finalizeBtn').disabled = !sure.checked;
+        });
+    }
+</script>
+}

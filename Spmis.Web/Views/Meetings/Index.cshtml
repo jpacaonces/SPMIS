@@ -1,0 +1,74 @@
+﻿@model Spmis.Web.Models.ClassRecord.MeetingsViewModel
+@{
+    ViewData["Title"] = "Meetings";
+}
+
+<h2>Meetings</h2>
+<p class="text-muted">@Model.Header · @Model.AttendanceMode attendance</p>
+
+@if (TempData["Success"] is string ok)
+{
+    <div class="alert alert-success">@ok</div>
+}
+
+<p>
+    <a class="btn btn-primary" asp-action="Create" asp-route-id="@Model.ClassOfferingId">Add meeting</a>
+    <a class="btn btn-outline-secondary" asp-controller="ClassRecord" asp-action="Show"
+       asp-route-id="@Model.ClassOfferingId">Back to class record</a>
+</p>
+
+@if (!Model.Items.Any())
+{
+    <p>No meetings yet.</p>
+}
+else
+{
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Period</th>
+                <th>Topic</th>
+                @if (Model.AttendanceMode == "ActivityBased")
+                {
+                    <th>Linked assessment</th>
+                }
+                <th class="text-end">Attendance rows</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var m in Model.Items)
+            {
+                <tr class="@(m.IsActive ? "" : "text-muted")">
+                    <td>@m.Date.ToString("yyyy-MM-dd")</td>
+                    <td>@m.PeriodName</td>
+                    <td>@m.Topic</td>
+                    @if (Model.AttendanceMode == "ActivityBased")
+                    {
+                        <td>@m.LinkedAssessment</td>
+                    }
+                    <td class="text-end">@m.RecordCount</td>
+                    <td>@(m.IsActive ? "Held" : "Cancelled")</td>
+                    <td class="text-nowrap">
+
+                        @if (m.IsActive)
+                        {
+                            @if (Model.AttendanceMode == "Meetings")
+                            {
+                                <a asp-controller="Attendance" asp-action="Take" asp-route-id="@m.Id">Attendance</a>
+                                <span> · </span>
+                            }
+                            <a asp-action="Status" asp-route-id="@m.Id" asp-route-activate="false">Cancel</a>
+                        }
+                        else
+                        {
+                            <a asp-action="Status" asp-route-id="@m.Id" asp-route-activate="true">Reactivate</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

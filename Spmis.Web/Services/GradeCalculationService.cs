@@ -76,7 +76,7 @@ public class GradeCalculationService : IGradeCalculationService
             join s in _db.Students on e.StudentId equals s.Id
             join u in _db.Users on s.UserId equals u.Id
             orderby s.StudentNo
-            select new { e.Id, s.StudentNo, u.LastName, u.FirstName };
+            select new { e.Id, e.StudentId, s.StudentNo, u.LastName, u.FirstName };
         if (onlyEnrollmentId is not null)
         {
             var only = (uint)onlyEnrollmentId.Value;
@@ -102,6 +102,16 @@ public class GradeCalculationService : IGradeCalculationService
                 .ToListAsync())
             .ToDictionary(a => (a.EnrollmentId, a.MeetingId), a => a.Status);
 
+        // Approved excuse letters for THIS class: dates the student is excused.
+        var excuseRows = await (
+            from d in _db.ExcuseDecisions.AsNoTracking()
+            where d.ClassOfferingId == classId && d.Status == "Approved"
+            join l in _db.ExcuseLetters on d.LetterId equals l.Id
+            select new { l.StudentId, l.DateFrom, l.DateTo }).ToListAsync();
+        var excuseRanges = excuseRows
+            .GroupBy(x => x.StudentId)
+            .ToDictionary(g => g.Key, g => g.Select(x => (x.DateFrom, x.DateTo)).ToList());
+
         var activityBased = offering.AttendanceMode == "ActivityBased";
 
         // ---- compute in memory with the pure engine ----
@@ -121,7 +131,8 @@ public class GradeCalculationService : IGradeCalculationService
                     {
                         var statuses = activityBased
                             ? ActivityAttendance(e.Id, p.StartDate, p.EndDate, meetings, assessmentsById, scoreMap)
-                            : RecordedAttendance(e.Id, p.StartDate, p.EndDate, meetings, attendanceMap);
+                        : RecordedAttendance(e.Id, p.StartDate, p.EndDate, meetings, attendanceMap,
+                            excuseRanges.GetValueOrDefault(e.StudentId));
 
                         inputs.Add(new ComponentInput(c.Name, type, c.WeightPct, true, [],
                             GradingEngine.ComputeAttendancePercent(statuses)));
@@ -159,17 +170,26 @@ public class GradeCalculationService : IGradeCalculationService
         a.IsRequired == true);
 
     // Meetings mode: the recorded attendance of the active meetings inside the period.
+    // An Absent mark inside an approved excuse letter's dates counts as Excused.
     private static List<AttendanceStatus> RecordedAttendance(
         uint enrollmentId, DateOnly start, DateOnly end,
         List<ClassMeeting> meetings,
-        Dictionary<(uint, uint), string> attendanceMap)
+        Dictionary<(uint, uint), string> attendanceMap,
+        List<(DateOnly From, DateOnly To)>? excused)
     {
         var list = new List<AttendanceStatus>();
         foreach (var m in meetings.Where(m => m.MeetingDate >= start && m.MeetingDate <= end))
         {
-            if (attendanceMap.TryGetValue((enrollmentId, m.Id), out var status))
-                list.Add(Enum.Parse<AttendanceStatus>(status));
-            // no record yet: not counted
+            if (!attendanceMap.TryGetValue((enrollmentId, m.Id), out var text))
+                continue;   // no record yet: not counted
+
+            var status = Enum.Parse<AttendanceStatus>(text);
+            if (status == AttendanceStatus.Absent && excused is not null &&
+                excused.Any(r => m.MeetingDate >= r.From && m.MeetingDate <= r.To))
+            {
+                status = AttendanceStatus.Excused;
+            }
+            list.Add(status);
         }
         return list;
     }

@@ -1,0 +1,43 @@
+﻿@model List<Spmis.Web.Models.Portal.MyLetterItem>
+@{ ViewData["Title"] = "My excuse letters"; }
+
+<h2>My excuse letters</h2>
+
+@if (TempData["Success"] is string ok) { <div class="alert alert-success">@ok</div> }
+
+<p><a class="btn btn-primary" asp-action="Submit">Submit a letter</a></p>
+
+@if (!Model.Any())
+{
+    <p>You have not submitted any letters.</p>
+}
+@foreach (var l in Model)
+{
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <strong>@l.DateFrom.ToString("yyyy-MM-dd") to @l.DateTo.ToString("yyyy-MM-dd")</strong>
+                <small class="text-muted">submitted @l.SubmittedAt.ToString("yyyy-MM-dd HH:mm")</small>
+            </div>
+            <p class="mb-1">@l.Reason</p>
+            <p class="small">File: <a asp-action="Download" asp-route-id="@l.LetterId">@l.FileName</a></p>
+            <table class="table table-sm w-auto mb-0">
+                <thead><tr><th>Subject</th><th>Decision</th><th>Teacher's reason</th></tr></thead>
+                <tbody>
+                @foreach (var d in l.Decisions)
+                {
+                    <tr>
+                        <td>@d.SubjectCode</td>
+                        <td>
+                            @if (d.Status == "Approved") { <span class="badge bg-success">Approved</span> }
+                            else if (d.Status == "Rejected") { <span class="badge bg-danger">Rejected</span> }
+                            else { <span class="badge bg-secondary">Waiting</span> }
+                        </td>
+                        <td>@d.DecisionReason</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

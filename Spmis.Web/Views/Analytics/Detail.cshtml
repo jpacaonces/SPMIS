@@ -1,0 +1,41 @@
+﻿@model Spmis.Web.Models.Analytics.ClassRiskViewModel
+@{ ViewData["Title"] = "Class risk"; }
+
+<p><a asp-action="Index">&larr; Program overview</a></p>
+<h2>@Model.Header <small class="text-muted">@Model.Section</small></h2>
+<p class="text-muted">
+    Teacher: @Model.Faculty ·
+    @if (Model.ClassStatus == "Finalized") { <span class="badge bg-dark">Finalized</span> } else { <span class="badge bg-secondary">Open</span> }
+</p>
+
+<div class="alert alert-info small">
+    Grades are estimates until the class is finalized.
+    At risk = estimated raw grade below @(Model.PassingRaw?.ToString("0.##") ?? "?") + @Model.MarginPoints.ToString("0.##") points,
+    or absences near or over @Model.AbsenceLimitPercent.ToString("0.##")% of held meetings.
+    @if (Model.AttendanceMode != "Meetings") { <span> This class is activity-based, so the absence rule does not apply.</span> }
+    else { <span> Meetings held so far: @Model.HeldMeetings.</span> }
+</div>
+
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th>Student no.</th><th>Name</th><th>Status</th>
+            <th class="text-end">Raw</th><th class="text-end">Grade</th>
+            <th class="text-end">Absences</th><th>Why at risk</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var r in Model.Rows)
+    {
+        <tr class="@(r.IsAtRisk ? "table-warning" : "")">
+            <td>@r.StudentNo</td>
+            <td>@r.Name</td>
+            <td>@r.Status</td>
+            <td class="text-end">@(r.RawGrade?.ToString("0.00") ?? "-")</td>
+            <td class="text-end">@(r.ReportedGrade?.ToString("0.00") ?? "-")</td>
+            <td class="text-end">@(r.Absences is null ? "-" : $"{r.Absences} ({r.AbsencePercent:0.#}%)")</td>
+            <td>@foreach (var why in r.Reasons) { <span class="badge bg-danger me-1">@why</span> }</td>
+        </tr>
+    }
+    </tbody>
+</table>

@@ -1,0 +1,62 @@
+﻿@using Spmis.Web.Data.Auth
+@{
+    ViewData["Title"] = "Home";
+
+    var tiles = new List<(string Title, string Text, string Controller, string Action)>();
+
+    if (User.IsInRole(RoleNames.Administrator))
+    {
+        tiles.Add(("Users", "Accounts, roles and status", "Users", "Index"));
+        tiles.Add(("Academic terms", "Terms and grading period dates", "Terms", "Index"));
+        tiles.Add(("Programs", "BSIT, BSCS and more", "Programs", "Index"));
+        tiles.Add(("Subjects", "Subject catalogue", "Subjects", "Index"));
+        tiles.Add(("Sections", "Sections per program and year", "Sections", "Index"));
+        tiles.Add(("Class offerings", "Classes, teachers and rosters", "ClassOfferings", "Index"));
+        tiles.Add(("Audit log", "Who changed what, and why", "AuditLog", "Index"));
+    }
+    if (User.IsInRole(RoleNames.Faculty))
+    {
+        tiles.Add(("My classes", "Class records, scores and attendance", "ClassRecord", "Index"));
+        tiles.Add(("Excuse letters", "Review letters from your students", "Excuses", "Index"));
+    }
+    if (User.IsInRole(RoleNames.Student))
+    {
+        tiles.Add(("My grades", "Grades, attendance and what-if", "MyGrades", "Index"));
+        tiles.Add(("Excuse letters", "Submit and track your letters", "MyExcuses", "Index"));
+    }
+    if (User.IsInRole(RoleNames.ProgramHead))
+    {
+        tiles.Add(("Program overview", "Class results and at-risk students", "Analytics", "Index"));
+    }
+}
+
+<div class="hero mb-4">
+    <img src="~/images/lyceum-logo.png" alt="Lyceum of Alabang seal" />
+    <div>
+        <h1>Student Performance Management Information System</h1>
+        <p>Lyceum of Alabang &middot; College of Computer Studies</p>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <p>Signed in as <strong>@User.Identity.Name</strong></p>
+        }
+    </div>
+</div>
+
+@if (User.Identity?.IsAuthenticated != true)
+{
+    <a class="btn btn-primary" asp-controller="Account" asp-action="Login">Sign in</a>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var t in tiles)
+        {
+            <div class="col-12 col-sm-6 col-lg-4">
+                <a class="tile" asp-controller="@t.Controller" asp-action="@t.Action">
+                    <strong>@t.Title</strong>
+                    <span>@t.Text</span>
+                </a>
+            </div>
+        }
+    </div>
+}

@@ -1,0 +1,67 @@
+﻿@model Spmis.Web.Models.Portal.WhatIfViewModel
+@{ ViewData["Title"] = "What if?"; }
+
+<h2>What if? <small class="text-muted">@Model.Header</small></h2>
+<p><a asp-controller="MyGrades" asp-action="Show" asp-route-id="@Model.EnrollmentId">&larr; Back to this class</a></p>
+
+<div class="alert alert-info">
+    <strong>Estimate only.</strong> This is not your official grade and nothing here is saved.
+    Enter the period grade (0–100) you think you will get. Leave a box empty to assume your current average.
+</div>
+
+@if (Model.Blocked is not null)
+{
+    <div class="alert alert-warning">@Model.Blocked</div>
+}
+else
+{
+    @if (Model.Error is not null) { <div class="alert alert-danger">@Model.Error</div> }
+
+    <form method="post">
+        <table class="table" style="max-width:640px">
+            <thead><tr><th>Period</th><th>Now</th><th>Your assumed grade</th></tr></thead>
+            <tbody>
+            @foreach (var p in Model.Periods)
+            {
+                <tr>
+                    <td>@p.Code</td>
+                    <td>
+                        @if (p.CurrentRaw is null) { <span class="text-muted">No data yet</span> }
+                        else
+                        {
+                            @p.CurrentRaw.Value.ToString("0.00")
+                            @if (p.Status == "Provisional") { <span class="badge bg-warning text-dark">Estimate</span> }
+                        }
+                    </td>
+                    <td>
+                        @if (p.IsLocked) { <span class="badge bg-secondary">Complete, locked</span> }
+                        else { <input name="assumed[@p.Code]" value="@p.Assumed" class="form-control" inputmode="decimal" placeholder="e.g. 85" /> }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-primary">Calculate</button>
+    </form>
+
+    @if (Model.Scenarios.Any())
+    {
+        <h4 class="mt-4">Result (estimate)</h4>
+        <table class="table" style="max-width:640px">
+            <thead><tr><th>Scenario</th><th class="text-end">Raw</th><th class="text-end">Grade</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var s in Model.Scenarios)
+            {
+                <tr>
+                    <td>@s.Label</td>
+                    <td class="text-end">@s.Raw.ToString("0.00")</td>
+                    <td class="text-end">@s.Reported.ToString("0.00")</td>
+                    <td>@if (s.IsPassing) { <span class="badge bg-success">Passing</span> } else { <span class="badge bg-danger">Not passing</span> }</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        @if (Model.NeededMessage is not null) { <p><strong>@Model.NeededMessage</strong></p> }
+        <p class="text-muted small">The semester grade is the equal average of the four period grades. A period grade is Class Standing (60) plus Major Exam (40). Grades use the school's current conversion table.</p>
+    }
+}

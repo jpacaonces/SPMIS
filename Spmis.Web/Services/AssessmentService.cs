@@ -7,6 +7,8 @@ namespace Spmis.Web.Services;
 
 public class AssessmentService : IAssessmentService
 {
+    private const string FinalizedMessage =
+        "This class has been finalized. No further changes are allowed.";
     private readonly SpmisDbContext _db;
     private readonly IAuditLogger _audit;
     private readonly IReasonService _reasons;
@@ -116,6 +118,9 @@ public class AssessmentService : IAssessmentService
             .AnyAsync(t => t.Id == c.TermId && t.IsCurrent == true);
         if (!termIsCurrent)
             return new(false, "", "Assessments can only be added in the current term.");
+
+        if (c.Status == "Finalized")
+            return new(false, "", FinalizedMessage);
 
         var title = (vm.Title ?? "").Trim();
         if (title.Length == 0)
@@ -259,6 +264,9 @@ public class AssessmentService : IAssessmentService
         if (!await TermIsCurrentAsync(x.O))
             return new(false, "", "Assessments can only be changed in the current term.");
 
+        if (x.O.Status == "Finalized")
+            return new(false, "", FinalizedMessage);
+
         var title = (vm.Title ?? "").Trim();
         if (title.Length == 0)
             return new(false, nameof(vm.Title), "Title is required.");
@@ -363,6 +371,9 @@ public class AssessmentService : IAssessmentService
 
         if (!await TermIsCurrentAsync(x.O))
             return new(false, "", "Assessments can only be changed in the current term.");
+
+        if (x.O.Status == "Finalized")
+            return new(false, "", FinalizedMessage);
 
         var a = x.A;
         var currentlyActive = a.IsActive == true;

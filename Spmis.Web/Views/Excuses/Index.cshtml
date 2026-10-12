@@ -1,0 +1,52 @@
+﻿@model Spmis.Web.Models.ClassRecord.ExcuseListViewModel
+@{ ViewData["Title"] = "Excuse letters"; }
+
+<h2>Excuse letters</h2>
+
+@if (TempData["Success"] is string ok)
+{
+    <div class="alert alert-success">@ok</div>
+}
+@if (Model.NoFacultyMessage is not null)
+{
+    <div class="alert alert-warning">@Model.NoFacultyMessage</div>
+}
+
+<ul class="nav nav-pills mb-3">
+    @foreach (var f in new[] { ("pending", "Pending"), ("decided", "Decided"), ("all", "All") })
+    {
+        <li class="nav-item">
+            <a class="nav-link @(Model.Filter == f.Item1 ? "active" : "")"
+               asp-action="Index" asp-route-filter="@f.Item1">@f.Item2</a>
+        </li>
+    }
+</ul>
+
+@if (!Model.Items.Any())
+{
+    <p>No letters to show.</p>
+}
+else
+{
+    <table class="table table-sm">
+        <thead>
+            <tr><th>Student</th><th>Subject</th><th>Dates</th><th>Reason</th>
+                <th class="text-end">Meetings</th><th>Submitted</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody>
+        @foreach (var i in Model.Items)
+        {
+            <tr>
+                <td>@i.StudentNo<br /><small class="text-muted">@i.StudentName</small></td>
+                <td>@i.SubjectCode</td>
+                <td>@i.DateFrom.ToString("yyyy-MM-dd") to @i.DateTo.ToString("yyyy-MM-dd")</td>
+                <td>@i.Reason</td>
+                <td class="text-end">@i.MeetingsInRange</td>
+                <td>@i.SubmittedAt.ToString("yyyy-MM-dd")</td>
+                <td>@i.Status</td>
+                <td><a asp-action="Decide" asp-route-id="@i.DecisionId">@(i.Status == "Pending" ? "Review" : "View")</a></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

@@ -480,3 +480,6 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# SPMIS: uploaded excuse letters (student documents) must never be committed
+App_Data/

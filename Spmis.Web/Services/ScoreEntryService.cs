@@ -4,8 +4,11 @@ using Spmis.Web.Models.ClassRecord;
 
 namespace Spmis.Web.Services;
 
+
 public class ScoreEntryService : IScoreEntryService
 {
+    private const string FinalizedMessage =
+        "This class has been finalized. No further changes are allowed.";
     private static readonly string[] Statuses =
         { "Pending", "Submitted", "Missing", "Excused", "Violation" };
 
@@ -138,6 +141,9 @@ public class ScoreEntryService : IScoreEntryService
 
         if (x.A.IsActive != true)
             return new(false, "", "This assessment is inactive. Reactivate it to enter scores.", 0);
+
+        if (x.O.Status == "Finalized")
+            return new(false, "", FinalizedMessage, 0);
 
         var termIsCurrent = await _db.AcademicTerms.AsNoTracking()
             .AnyAsync(t => t.Id == x.O.TermId && t.IsCurrent == true);
@@ -348,6 +354,9 @@ public class ScoreEntryService : IScoreEntryService
     {
         var x = await OwnedAsync(userId, vm.AssessmentId);
         if (x is null) return new(false, "", "This assessment is not available.", 0);
+
+        if (x.O.Status == "Finalized")
+            return new(false, "", FinalizedMessage, 0);
 
         var termIsCurrent = await _db.AcademicTerms.AsNoTracking()
             .AnyAsync(t => t.Id == x.O.TermId && t.IsCurrent == true);

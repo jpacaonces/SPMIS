@@ -16,6 +16,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews(options =>
 {
     options.Filters.Add(new AuthorizeFilter());
+    options.Filters.Add(new AuthorizeFilter());
+    options.Filters.Add<MustChangePasswordFilter>();
 });
 
 // ---- Database (added in Step 3b) -------------------------------------
@@ -33,6 +35,9 @@ builder.Services.AddDbContext<SpmisDbContext>(options =>
 
 builder.Services.AddDbContext<AppIdentityDbContext>(options =>
     options.UseMySql(connectionString, serverVersion));
+
+builder.Services.AddSingleton<IExcuseFileStore, ExcuseFileStore>();
+builder.Services.AddScoped<IStudentExcuseService, StudentExcuseService>();
 
 // ---- Identity (added in Step 3b) -------------------------------------
 builder.Services
@@ -83,6 +88,13 @@ builder.Services.AddScoped<IGradeCalculationService, GradeCalculationService>();
 builder.Services.AddScoped<IClassRecordService, ClassRecordService>();
 builder.Services.AddScoped<IAssessmentService, AssessmentService>();
 builder.Services.AddScoped<IScoreEntryService, ScoreEntryService>();
+builder.Services.AddScoped<IMeetingService, MeetingService>();
+builder.Services.AddScoped<IAttendanceService, AttendanceService>();
+builder.Services.AddScoped<IExcuseService, ExcuseService>();
+builder.Services.AddScoped<IFinalizeService, FinalizeService>();
+builder.Services.AddScoped<IStudentPortalService, StudentPortalService>();
+builder.Services.AddScoped<IWhatIfService, WhatIfService>();
+builder.Services.AddScoped<IProgramAnalyticsService, ProgramAnalyticsService>();
 
 var app = builder.Build();
 

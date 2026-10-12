@@ -1,0 +1,55 @@
+﻿@model Spmis.Web.Models.Portal.ExcuseSubmitViewModel
+@{ ViewData["Title"] = "Submit excuse letter"; }
+
+<h2>Submit an excuse letter</h2>
+<p class="text-muted">
+    One letter goes to every class you are enrolled in. Each teacher decides for their own class.
+    Letters cannot be edited or deleted after submitting.
+</p>
+
+<form asp-action="Submit" method="post" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="GuardianName" class="form-label"></label>
+        <input asp-for="GuardianName" class="form-control" maxlength="120" />
+        <span asp-validation-for="GuardianName" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="GuardianRelationship" class="form-label"></label>
+        <input asp-for="GuardianRelationship" class="form-control" maxlength="40" />
+        <span asp-validation-for="GuardianRelationship" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="SignatoryName" class="form-label"></label>
+        <input asp-for="SignatoryName" class="form-control" maxlength="120" />
+        <span asp-validation-for="SignatoryName" class="text-danger"></span>
+    </div>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label asp-for="DateFrom" class="form-label"></label>
+            <input asp-for="DateFrom" type="date" class="form-control" />
+            <span asp-validation-for="DateFrom" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="DateTo" class="form-label"></label>
+            <input asp-for="DateTo" type="date" class="form-control" />
+            <span asp-validation-for="DateTo" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Reason" class="form-label"></label>
+        <textarea asp-for="Reason" class="form-control" rows="3" maxlength="500"></textarea>
+        <span asp-validation-for="Reason" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="File" class="form-label"></label>
+        <input asp-for="File" type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png" />
+        <span asp-validation-for="File" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit letter</button>
+    <a class="btn btn-outline-secondary" asp-action="Index">Cancel</a>
+</form>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

@@ -1,0 +1,43 @@
+﻿@model Spmis.Web.Models.Analytics.ProgramDashboardViewModel
+@{ ViewData["Title"] = "Program overview"; }
+
+<h2>Program overview</h2>
+@if (Model.ProgramLabel is not null) { <p class="text-muted">@Model.ProgramLabel</p> }
+@if (Model.Message is not null) { <div class="alert alert-warning">@Model.Message</div> }
+
+@if (Model.Message is null)
+{
+    <div class="row mb-3" style="max-width:520px">
+        <div class="col"><div class="card p-2 text-center"><div class="fs-4">@Model.TotalStudents</div><small>Enrollments</small></div></div>
+        <div class="col"><div class="card p-2 text-center"><div class="fs-4 text-danger">@Model.TotalAtRisk</div><small>At risk</small></div></div>
+    </div>
+
+    <p class="text-muted small">
+        Grades are estimates until a class is finalized. At risk = estimated raw grade below passing plus @Model.MarginPoints.ToString("0.##") points, or absences near or over the class limit.
+    </p>
+
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>Subject</th><th>Section</th><th>Teacher</th><th>Class</th>
+                <th class="text-end">Students</th><th class="text-end">Avg raw</th>
+                <th class="text-end">Passing</th><th class="text-end">At risk</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var r in Model.Rows)
+        {
+            <tr>
+                <td><a asp-action="Detail" asp-route-id="@r.ClassOfferingId">@r.Subject</a></td>
+                <td>@r.Section</td>
+                <td>@r.Faculty</td>
+                <td>@if (r.ClassStatus == "Finalized") { <span class="badge bg-dark">Finalized</span> } else { <span class="badge bg-secondary">Open</span> }</td>
+                <td class="text-end">@r.Students</td>
+                <td class="text-end">@(r.AverageRaw?.ToString("0.00") ?? "-")</td>
+                <td class="text-end">@r.Passing</td>
+                <td class="text-end">@if (r.AtRisk > 0) { <span class="badge bg-danger">@r.AtRisk</span> } else { <span>0</span> }</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

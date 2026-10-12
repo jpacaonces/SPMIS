@@ -1,0 +1,120 @@
+﻿@model Spmis.Web.Models.ClassRecord.AttendanceViewModel
+@{
+    ViewData["Title"] = "Attendance";
+}
+
+<h2>Attendance</h2>
+<p class="text-muted">
+    @Model.Header · <strong>@Model.Date.ToString("yyyy-MM-dd")</strong>
+    @if (!string.IsNullOrEmpty(Model.Topic))
+    {
+        <span> · @Model.Topic</span>
+    }
+    · absence limit @Model.AbsenceLimitPercent.ToString("0.##")% of @Model.HeldMeetings held meeting(s)
+</p>
+
+@if (TempData["Success"] is string ok)
+{
+    <div class="alert alert-success">@ok</div>
+}
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+<p class="small text-muted">
+    Late and Excused are not absences. Changing a mark that is already recorded asks for a reason.
+    A recorded mark cannot be cleared.
+</p>
+
+<form id="attendanceForm" asp-action="Take" method="post">
+    <input type="hidden" name="MeetingId" value="@Model.MeetingId" />
+
+    <p>
+        <button type="button" id="allPresent" class="btn btn-sm btn-outline-secondary">
+            Mark all unmarked as Present
+        </button>
+    </p>
+
+    <table class="table table-sm align-middle">
+        <thead>
+            <tr>
+                <th>Student no.</th>
+                <th>Name</th>
+                <th>Status</th>
+                <th class="text-end">Absences</th>
+                <th class="text-end">%</th>
+                <th>Flag</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (var i = 0; i < Model.Rows.Count; i++)
+            {
+                var r = Model.Rows[i];
+                var recorded = !string.IsNullOrEmpty(r.Status);
+                <tr data-recorded="@(recorded ? "true" : "false")" data-orig="@r.Status">
+                    <td>@r.StudentNo</td>
+                    <td>@r.StudentName</td>
+                    <td>
+                        <input type="hidden" name="Rows[@i].EnrollmentId" value="@r.EnrollmentId" />
+                        <input type="hidden" name="Rows[@i].RecordId" value="@r.RecordId" />
+                        <input type="hidden" name="Rows[@i].RowVersionTicks" value="@r.RowVersionTicks" />
+                        <select name="Rows[@i].Status" class="form-select form-select-sm">
+                            <option value="">— not marked —</option>
+                            @foreach (var s in new[] { "Present", "Late", "Absent", "Excused" })
+                            {
+                                <option value="@s" selected="@(s == r.Status)">@s</option>
+                            }
+                        </select>
+                    </td>
+                    <td class="text-end">@r.Absences</td>
+                    <td class="text-end">@r.AbsencePercent.ToString("0.#")</td>
+                    <td>
+                        @if (r.Flag == "Over limit")
+                        {
+                            <span class="badge bg-danger">Over limit</span>
+                        }
+                        else if (r.Flag == "Near limit")
+                        {
+
+                            <span class="badge bg-warning text-dark">Near limit</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button type="button" id="saveBtn" class="btn btn-primary">Save attendance</button>
+    <a class="btn btn-outline-secondary" asp-controller="Meetings" asp-action="Index"
+       asp-route-id="@Model.ClassOfferingId">Back to meetings</a>
+</form>
+
+@await Component.InvokeAsync("ReasonDialog", new
+{
+    context = "AttendanceEdit",
+    formId = "attendanceForm",
+    selected = Model.Reason
+})
+
+@section Scripts {
+    <script>
+        var form = document.getElementById('attendanceForm');
+
+        document.getElementById('allPresent').addEventListener('click', function () {
+            form.querySelectorAll('tbody select').forEach(function (s) {
+                if (s.value === '') s.value = 'Present';
+            });
+        });
+
+        // Convenience only: the SERVER decides whether a reason is required.
+        document.getElementById('saveBtn').addEventListener('click', function () {
+            var needsReason = false;
+            form.querySelectorAll('tbody tr[data-recorded="true"]').forEach(function (tr) {
+                if (tr.querySelector('select').value !== tr.getAttribute('data-orig')) needsReason = true;
+            });
+            if (needsReason) {
+                new bootstrap.Modal(document.getElementById('reasonModal')).show();
+            } else {
+                form.submit();
+            }
+        });
+    </script>
+}
