@@ -1,0 +1,53 @@
+﻿@model Spmis.Web.Models.Admin.SectionCreateViewModel
+@{ ViewData["Title"] = "New section"; }
+
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+
+<form asp-action="Create" method="post" style="max-width:420px">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="ProgramId" class="form-label"></label>
+        <select asp-for="ProgramId" asp-items="Model.Programs" class="form-select">
+            <option value="">Select...</option>
+        </select>
+        <span asp-validation-for="ProgramId" class="text-danger"></span>
+    </div>
+    <div class="row">
+        <div class="col mb-3">
+            <label asp-for="YearLevel" class="form-label"></label>
+            <select asp-for="YearLevel" class="form-select">
+                <option value="">Select...</option>
+                <option value="1">1</option><option value="2">2</option>
+                <option value="3">3</option><option value="4">4</option>
+            </select>
+            <span asp-validation-for="YearLevel" class="text-danger"></span>
+        </div>
+        <div class="col mb-3">
+            <label asp-for="Semester" class="form-label"></label>
+            <select asp-for="Semester" class="form-select">
+                <option value="">Select...</option>
+                <option value="1">1</option><option value="2">2</option>
+            </select>
+            <span asp-validation-for="Semester" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="mb-3">
+        <label asp-for="ShiftId" class="form-label"></label>
+        <select asp-for="ShiftId" asp-items="Model.Shifts" class="form-select">
+            <option value="">Select...</option>
+        </select>
+        <span asp-validation-for="ShiftId" class="text-danger"></span>
+        <div class="form-text">Year 1-2: Morning or Afternoon. Year 3-4: Afternoon or Evening.</div>
+    </div>
+    <div class="mb-3">
+        <label asp-for="SectionNo" class="form-label"></label>
+        <input asp-for="SectionNo" type="number" min="1" max="20" class="form-control" />
+        <span asp-validation-for="SectionNo" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create section</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+</form>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

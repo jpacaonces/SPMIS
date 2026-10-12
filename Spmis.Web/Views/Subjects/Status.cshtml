@@ -1,0 +1,43 @@
+﻿@model Spmis.Web.Models.Admin.SubjectStatusViewModel
+@{
+    var deactivating = !Model.Activate;
+    ViewData["Title"] = deactivating ? "Deactivate subject" : "Reactivate subject";
+}
+
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+
+<dl class="row">
+    <dt class="col-sm-2">Code</dt><dd class="col-sm-10">@Model.Code</dd>
+    <dt class="col-sm-2">Title</dt><dd class="col-sm-10">@Model.Title</dd>
+    <dt class="col-sm-2">Status</dt>
+    <dd class="col-sm-10">@(Model.IsActive ? "Active" : "Inactive")</dd>
+</dl>
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+@if (Model.Blocker is not null)
+{
+    <div class="alert alert-danger">@Model.Blocker</div>
+}
+
+<p>Nothing is deleted. The subject can be reactivated later.</p>
+
+<form id="subjectForm" asp-action="Status" method="post">
+    <input type="hidden" name="SubjectId" value="@Model.SubjectId" />
+    <input type="hidden" name="Activate" value="@(Model.Activate ? "true" : "false")" />
+
+    <button type="button"
+            class="btn @(deactivating ? "btn-danger" : "btn-success")"
+            data-bs-toggle="modal" data-bs-target="#reasonModal"
+            disabled="@(Model.Blocker is not null)">
+        @(deactivating ? "Deactivate subject" : "Reactivate subject")
+    </button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Back to subjects</a>
+</form>
+
+@await Component.InvokeAsync("ReasonDialog", new
+{
+    context = deactivating ? "Deactivate" : "Reactivate",
+    formId = "subjectForm",
+    selected = Model.Reason
+})

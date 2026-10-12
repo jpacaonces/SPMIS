@@ -1,0 +1,65 @@
+﻿@model Spmis.Web.Models.ClassRecord.AssessmentEditViewModel
+@{ ViewData["Title"] = "Edit assessment"; var needsReason = Model.ScoreRows > 0; }
+
+<h2>Edit assessment</h2>
+<p class="text-muted">@Model.Header · @Model.PeriodName · @Model.ComponentName</p>
+
+@if (needsReason)
+{
+    <div class="alert alert-warning">
+        @Model.ScoreRows score row(s) already exist. Changes can alter student grades, so a reason is required.
+    </div>
+}
+
+<form id="assessmentForm" asp-action="Edit" method="post">
+    <input type="hidden" asp-for="AssessmentId" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label"></label>
+        <input asp-for="Title" class="form-control" maxlength="150" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="MaxScore" class="form-label"></label>
+        <input asp-for="MaxScore" class="form-control" type="number" step="0.01" min="0.01" />
+        <span asp-validation-for="MaxScore" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="DueDate" class="form-label"></label>
+        <input asp-for="DueDate" class="form-control" type="datetime-local" />
+        <span asp-validation-for="DueDate" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="PassingPercent" class="form-label"></label>
+        <input asp-for="PassingPercent" class="form-control" type="number" step="0.01" min="0" max="100" />
+        <span asp-validation-for="PassingPercent" class="text-danger"></span>
+    </div>
+    <div class="form-check mb-3">
+        <input asp-for="IsRequired" class="form-check-input" />
+        <label asp-for="IsRequired" class="form-check-label"></label>
+    </div>
+
+    @if (needsReason)
+    {
+        <button type="button" class="btn btn-primary"
+                data-bs-toggle="modal" data-bs-target="#reasonModal">Save changes</button>
+    }
+    else
+    {
+        <button type="submit" class="btn btn-primary">Save changes</button>
+    }
+    <a class="btn btn-outline-secondary" asp-action="Index" asp-route-id="@Model.ClassOfferingId">Cancel</a>
+</form>
+
+@if (needsReason)
+{
+    @await Component.InvokeAsync("ReasonDialog", new
+    {
+        context = "ScoreEdit",
+        formId = "assessmentForm",
+        selected = Model.Reason
+    })
+}
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

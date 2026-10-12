@@ -57,12 +57,32 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
+
+// Check the security stamp on EVERY request (default is every 30 minutes),
+// so deactivating an account signs the person out on their next click.
+builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+{
+    options.ValidationInterval = TimeSpan.Zero;
+});
+
 // ---- Services (added in Step 5) --------------------------------------
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 builder.Services.AddScoped<IAuditLogger, AuditLogger>();
 
 builder.Services.AddScoped<IReasonService, ReasonService>();
+builder.Services.AddScoped<IUserAdminService, UserAdminService>();
+builder.Services.AddScoped<IAuditLogQueryService, AuditLogQueryService>();
+builder.Services.AddScoped<ITermAdminService, TermAdminService>();
+builder.Services.AddScoped<IProgramAdminService, ProgramAdminService>();
+builder.Services.AddScoped<ISubjectAdminService, SubjectAdminService>();
+builder.Services.AddScoped<ISectionAdminService, SectionAdminService>();
+builder.Services.AddScoped<IClassOfferingAdminService, ClassOfferingAdminService>();
+builder.Services.AddScoped<IEnrollmentAdminService, EnrollmentAdminService>();
+builder.Services.AddScoped<IGradeCalculationService, GradeCalculationService>();
+builder.Services.AddScoped<IClassRecordService, ClassRecordService>();
+builder.Services.AddScoped<IAssessmentService, AssessmentService>();
+builder.Services.AddScoped<IScoreEntryService, ScoreEntryService>();
 
 var app = builder.Build();
 

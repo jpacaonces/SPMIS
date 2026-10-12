@@ -1,0 +1,110 @@
+﻿@using Spmis.Web.Data.Auth
+@model Spmis.Web.Models.Admin.UserListViewModel
+@{
+    ViewData["Title"] = "Users";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">Users</h1>
+    <a asp-action="Create" class="btn btn-primary">New user</a>
+</div>
+
+@if (TempData["Success"] is string success)
+{
+    <div class="alert alert-success">@success</div>
+}
+
+<form method="get" asp-action="Index" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <input type="text" name="search" value="@Model.Search" class="form-control"
+               placeholder="Search name or email" />
+    </div>
+    <div class="col-md-3">
+        <select name="role" class="form-select">
+            <option value="">All roles</option>
+            @foreach (var r in RoleNames.All)
+            {
+                <option value="@r" selected="@(Model.Role == r)">@r</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select name="status" class="form-select">
+            <option value="">Active and inactive</option>
+            <option value="active" selected="@(Model.Status == "active")">Active only</option>
+            <option value="inactive" selected="@(Model.Status == "inactive")">Inactive only</option>
+        </select>
+    </div>
+    <div class="col-md-2 d-grid">
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </div>
+</form>
+
+<p class="text-muted">@Model.TotalCount account(s). Page @Model.Page of @Model.TotalPages.</p>
+
+<div class="table-responsive">
+    <table class="table table-sm table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>ID no.</th>
+                <th>Status</th>
+                <th></th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var u in Model.Items)
+            {
+                <tr>
+                    <td>@u.FullName</td>
+                    <td>@u.Email</td>
+                    <td>@string.Join(", ", u.Roles)</td>
+                    <td>@u.IdentifierNo</td>
+                    <td>
+                        @if (u.IsActive)
+                        {
+                            <span class="badge text-bg-success">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge text-bg-secondary">Inactive</span>
+                        }
+                    </td>
+
+                    <td class="text-end">
+                        <a asp-action="Edit" asp-route-id="@u.Id"
+                           class="btn btn-outline-primary btn-sm">Edit</a>
+                        <a asp-action="ResetPassword" asp-route-id="@u.Id"
+                           class="btn btn-outline-danger btn-sm">Reset password</a>
+                        <a asp-action="Status" asp-route-id="@u.Id"
+                           class="btn btn-outline-secondary btn-sm">
+                            @(u.IsActive ? "Deactivate" : "Reactivate")
+                        </a>
+                    </td>
+                </tr>
+            }
+            @if (!Model.Items.Any())
+            {
+                <tr><td colspan="6" class="text-center text-muted">No accounts match.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<nav class="d-flex gap-2">
+    @if (Model.HasPrevious)
+    {
+        <a class="btn btn-outline-secondary btn-sm" asp-action="Index"
+           asp-route-search="@Model.Search" asp-route-role="@Model.Role"
+           asp-route-status="@Model.Status" asp-route-page="@(Model.Page - 1)">Previous</a>
+    }
+    @if (Model.HasNext)
+    {
+        <a class="btn btn-outline-secondary btn-sm" asp-action="Index"
+           asp-route-search="@Model.Search" asp-route-role="@Model.Role"
+           asp-route-status="@Model.Status" asp-route-page="@(Model.Page + 1)">Next</a>
+    }
+</nav>

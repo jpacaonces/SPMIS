@@ -1,0 +1,43 @@
+﻿@model Spmis.Web.Models.Admin.ProgramStatusViewModel
+@{
+    var deactivating = !Model.Activate;
+    ViewData["Title"] = deactivating ? "Deactivate program" : "Reactivate program";
+}
+
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+
+<dl class="row">
+    <dt class="col-sm-2">Code</dt><dd class="col-sm-10">@Model.Code</dd>
+    <dt class="col-sm-2">Name</dt><dd class="col-sm-10">@Model.Name</dd>
+    <dt class="col-sm-2">Status</dt>
+    <dd class="col-sm-10">@(Model.IsActive ? "Active" : "Inactive")</dd>
+</dl>
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+@if (Model.Blocker is not null)
+{
+    <div class="alert alert-danger">@Model.Blocker</div>
+}
+
+<p>Nothing is deleted. The program can be reactivated later.</p>
+
+<form id="programForm" asp-action="Status" method="post">
+    <input type="hidden" name="ProgramId" value="@Model.ProgramId" />
+    <input type="hidden" name="Activate" value="@(Model.Activate ? "true" : "false")" />
+
+    <button type="button"
+            class="btn @(deactivating ? "btn-danger" : "btn-success")"
+            data-bs-toggle="modal" data-bs-target="#reasonModal"
+            disabled="@(Model.Blocker is not null)">
+        @(deactivating ? "Deactivate program" : "Reactivate program")
+    </button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Back to programs</a>
+</form>
+
+@await Component.InvokeAsync("ReasonDialog", new
+{
+    context = deactivating ? "Deactivate" : "Reactivate",
+    formId = "programForm",
+    selected = Model.Reason
+})

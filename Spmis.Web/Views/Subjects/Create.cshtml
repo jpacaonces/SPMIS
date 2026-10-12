@@ -1,0 +1,39 @@
+﻿@model Spmis.Web.Models.Admin.SubjectCreateViewModel
+@{ ViewData["Title"] = "New subject"; }
+
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+
+<form asp-action="Create" method="post" style="max-width:480px">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="Code" class="form-label"></label>
+        <input asp-for="Code" class="form-control" />
+        <span asp-validation-for="Code" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+    <div class="row">
+        <div class="col mb-3">
+            <label asp-for="LectureUnits" class="form-label"></label>
+            <input asp-for="LectureUnits" type="number" min="0" max="9" class="form-control" />
+            <span asp-validation-for="LectureUnits" class="text-danger"></span>
+        </div>
+        <div class="col mb-3">
+            <label asp-for="LabUnits" class="form-label"></label>
+            <input asp-for="LabUnits" type="number" min="0" max="9" class="form-control" />
+            <span asp-validation-for="LabUnits" class="text-danger"></span>
+        </div>
+    </div>
+    <p class="text-muted small">
+        Units cannot be edited after the subject is created: lab units decide which grading components a class has.
+    </p>
+
+    <button type="submit" class="btn btn-primary">Create subject</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+</form>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

@@ -1,0 +1,109 @@
+﻿@model Spmis.Web.Models.Admin.UserEditViewModel
+@{
+    ViewData["Title"] = "Edit account";
+}
+
+<h1 class="h3 mb-3">Edit account</h1>
+
+<form id="editForm" asp-action="Edit" method="post" class="col-lg-6">
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+    <input type="hidden" asp-for="UserId" />
+    <input type="hidden" asp-for="ConcurrencyStamp" />
+
+    <p class="text-muted">Role: <strong>@string.Join(", ", Model.Roles)</strong> (cannot be changed here)</p>
+
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" autocomplete="off" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label asp-for="FirstName" class="form-label"></label>
+            <input asp-for="FirstName" class="form-control" />
+            <span asp-validation-for="FirstName" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="MiddleName" class="form-label"></label>
+            <input asp-for="MiddleName" class="form-control" />
+            <span asp-validation-for="MiddleName" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="LastName" class="form-label"></label>
+            <input asp-for="LastName" class="form-control" />
+            <span asp-validation-for="LastName" class="text-danger"></span>
+        </div>
+    </div>
+
+    @if (Model.IsStudent)
+    {
+        <div class="mb-3">
+            <label asp-for="StudentNo" class="form-label"></label>
+            <input asp-for="StudentNo" class="form-control" />
+            <span asp-validation-for="StudentNo" class="text-danger"></span>
+        </div>
+    }
+
+    @if (Model.IsStudent || Model.IsProgramHead)
+    {
+        <div class="mb-3">
+            <label asp-for="ProgramId" class="form-label"></label>
+            <select asp-for="ProgramId" class="form-select">
+                <option value="">Choose a program...</option>
+                @foreach (var p in Model.Programs)
+                {
+                    <option value="@p.Id" selected="@(Model.ProgramId == p.Id)">@p.Label</option>
+                }
+            </select>
+            <span asp-validation-for="ProgramId" class="text-danger"></span>
+        </div>
+    }
+
+    @if (Model.IsFaculty)
+    {
+        <div class="mb-3">
+            <label asp-for="EmployeeNo" class="form-label"></label>
+            <input asp-for="EmployeeNo" class="form-control" />
+            <span asp-validation-for="EmployeeNo" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="DepartmentId" class="form-label"></label>
+            <select asp-for="DepartmentId" class="form-select">
+                <option value="">Choose a department...</option>
+                @foreach (var d in Model.Departments)
+                {
+                    <option value="@d.Id" selected="@(Model.DepartmentId == d.Id)">@d.Label</option>
+                }
+            </select>
+            <span asp-validation-for="DepartmentId" class="text-danger"></span>
+        </div>
+    }
+
+    <button type="button" id="openReason" class="btn btn-primary">Save changes</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+</form>
+
+@await Component.InvokeAsync("ReasonDialog", new
+{
+    context = "AdminCorrection",
+    formId = "editForm",
+    selected = Model.Reason
+})
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Check the fields first, so the dialog never hides a form error.
+        // The server validates everything again either way.
+        document.getElementById('openReason').addEventListener('click', function () {
+            var form = document.getElementById('editForm');
+            if (window.jQuery && jQuery(form).valid && !jQuery(form).valid()) {
+                return;
+            }
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('reasonModal')).show();
+        });
+    </script>
+}

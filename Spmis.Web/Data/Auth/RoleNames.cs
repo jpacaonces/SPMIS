@@ -7,4 +7,7 @@ public static class RoleNames
     public const string Faculty = "Faculty";
     public const string Student = "Student";
     public const string ProgramHead = "ProgramHead";
+
+    public static readonly string[] All =
+        { Administrator, ProgramHead, Faculty, Student };
 }

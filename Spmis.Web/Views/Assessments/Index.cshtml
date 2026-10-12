@@ -1,0 +1,65 @@
+﻿@model Spmis.Web.Models.ClassRecord.AssessmentsViewModel
+@{ ViewData["Title"] = "Assessments"; }
+
+<h2>Assessments</h2>
+<p class="text-muted">@Model.Header · @Model.AttendanceMode attendance</p>
+
+@if (TempData["Success"] is string ok)
+{
+    <div class="alert alert-success">@ok</div>
+}
+
+<p>
+    <a class="btn btn-primary" asp-action="Create" asp-route-id="@Model.ClassOfferingId">Add assessment</a>
+    <a class="btn btn-outline-secondary" asp-controller="ClassRecord" asp-action="Show"
+       asp-route-id="@Model.ClassOfferingId">Back to class record</a>
+</p>
+
+@if (!Model.Items.Any())
+{
+    <p>No assessments yet.</p>
+}
+else
+{
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>Period</th><th>Component</th><th>Title</th>
+                <th class="text-end">Max</th><th>Due</th>
+                <th class="text-end">Passing %</th><th>Required</th>
+                <th class="text-end">Score rows</th><th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var a in Model.Items)
+        {
+            <tr class="@(a.IsActive ? "" : "text-muted")">
+                <td>@a.PeriodName</td>
+                <td>@a.ComponentName</td>
+                <td>@a.Title</td>
+                <td class="text-end">@a.MaxScore.ToString("0.##")</td>
+                <td>@(a.DueDate?.ToString("yyyy-MM-dd HH:mm") ?? "—")</td>
+                <td class="text-end">@a.PassingPercent.ToString("0.##")</td>
+                <td>@(a.IsRequired ? "Yes" : "No")</td>
+                <td class="text-end">@a.ScoreRows</td>
+                <td>@(a.IsActive ? "Active" : "Inactive")</td>
+                <td class="text-nowrap">
+                    @if (a.IsActive)
+                    {
+                        <a asp-controller="Scores" asp-action="Entry" asp-route-id="@a.Id">Enter scores</a>
+                        <span> · </span>
+                        <a asp-action="Edit" asp-route-id="@a.Id">Edit</a>
+                        <span> · </span>
+                        <a asp-action="Status" asp-route-id="@a.Id" asp-route-activate="false">Deactivate</a>
+                    }
+                    else
+                    {
+                        <a asp-action="Status" asp-route-id="@a.Id" asp-route-activate="true">Reactivate</a>
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

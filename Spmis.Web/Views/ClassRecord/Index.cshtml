@@ -1,0 +1,45 @@
+﻿@model Spmis.Web.Models.ClassRecord.MyClassesViewModel
+@{ ViewData["Title"] = "My classes"; }
+
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+
+@if (Model.NoFacultyProfile)
+{
+    <div class="alert alert-warning">Your account has no active faculty profile. Ask the administrator.</div>
+}
+else if (Model.TermLabel is null)
+{
+    <div class="alert alert-warning">There is no current term yet.</div>
+}
+else
+{
+    <p class="text-muted">Current term: <strong>@Model.TermLabel</strong> - @Model.Items.Count class(es)</p>
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="alert alert-info">You have no classes this term.</div>
+    }
+    else
+    {
+        <table class="table table-sm align-middle">
+            <thead>
+                <tr><th>Section</th><th>Subject</th><th>Attendance</th>
+                    <th>Enrolled</th><th>Status</th><th></th></tr>
+            </thead>
+            <tbody>
+            @foreach (var c in Model.Items)
+            {
+                <tr>
+                    <td>@c.SectionCode</td>
+                    <td>@c.SubjectCode <span class="text-muted">@c.SubjectTitle</span></td>
+                    <td>@c.AttendanceMode</td>
+                    <td>@c.Enrolled</td>
+                    <td>@c.Status</td>
+                    <td><a asp-action="Show" asp-route-id="@c.Id"
+                           class="btn btn-sm btn-primary">Open record</a></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+}

@@ -1,0 +1,68 @@
+﻿@model Spmis.Web.Models.Admin.RosterViewModel
+@{ ViewData["Title"] = "Class roster"; }
+
+<h1 class="h3 mb-1">@ViewData["Title"]: @Model.ClassLabel</h1>
+<p class="text-muted">
+    @Model.TermLabel - Faculty: @Model.Faculty - @Model.EnrolledCount enrolled
+</p>
+
+@if (TempData["Success"] is string ok)
+{
+    <div class="alert alert-success">@ok</div>
+}
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+@if (!Model.CanEdit)
+{
+    <div class="alert alert-warning">@Model.CannotEditReason The roster is read-only.</div>
+}
+else
+{
+    <form asp-action="Enroll" asp-route-id="@Model.ClassOfferingId" method="post"
+          class="row g-2 mb-3" style="max-width:520px">
+        <div class="col">
+            <input asp-for="Enroll.StudentNo" class="form-control" placeholder="Student number" />
+            <span asp-validation-for="Enroll.StudentNo" class="text-danger"></span>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Enroll</button>
+        </div>
+    </form>
+}
+
+<table class="table table-sm align-middle">
+    <thead><tr><th>Student no.</th><th>Name</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    @foreach (var s in Model.Items)
+    {
+        <tr>
+            <td>@s.StudentNo</td>
+            <td>@s.Name</td>
+            <td>
+                @if (s.Status == "Enrolled") { <span class="badge bg-success">Enrolled</span> }
+                else { <span class="badge bg-secondary">Dropped</span> }
+            </td>
+            <td>
+                @if (Model.CanEdit)
+                {
+                    @if (s.Status == "Enrolled")
+                    {
+                        <a asp-action="Status" asp-route-id="@s.EnrollmentId" asp-route-to="Dropped"
+                           class="btn btn-sm btn-outline-danger">Drop</a>
+                    }
+                    else
+                    {
+                        <a asp-action="Status" asp-route-id="@s.EnrollmentId" asp-route-to="Enrolled"
+                           class="btn btn-sm btn-outline-success">Reinstate</a>
+                    }
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+<a asp-controller="ClassOfferings" asp-action="Index" class="btn btn-outline-secondary">Back to classes</a>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

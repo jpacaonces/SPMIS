@@ -8,6 +8,17 @@
             <li class="nav-item">
                 <a class="nav-link text-dark" asp-controller="Admin" asp-action="Index">Administration</a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-controller="Users" asp-action="Index">Users</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-controller="AuditLog" asp-action="Index">Audit log</a>
+            </li>
+            <li class="nav-item"><a class="nav-link" asp-controller="Terms" asp-action="Index">Terms</a></li>
+            <li class="nav-item"><a class="nav-link" asp-controller="Programs" asp-action="Index">Programs</a></li>
+            <li class="nav-item"><a class="nav-link" asp-controller="Subjects" asp-action="Index">Subjects</a></li>
+            <li class="nav-item"><a class="nav-link" asp-controller="Sections" asp-action="Index">Sections</a></li>
+            <li class="nav-item"><a class="nav-link" asp-controller="ClassOfferings" asp-action="Index">Classes</a></li>
         }
         @if (User.IsInRole(RoleNames.ProgramHead))
         {
@@ -20,6 +31,7 @@
             <li class="nav-item">
                 <a class="nav-link text-dark" asp-controller="Faculty" asp-action="Index">My Classes</a>
             </li>
+            <li class="nav-item"><a class="nav-link" asp-controller="ClassRecord" asp-action="Index">My classes</a></li>
         }
         @if (User.IsInRole(RoleNames.Student))
         {

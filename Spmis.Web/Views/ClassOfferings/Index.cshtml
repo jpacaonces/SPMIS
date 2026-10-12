@@ -1,0 +1,79 @@
+﻿@model Spmis.Web.Models.Admin.ClassOfferingListViewModel
+@{ ViewData["Title"] = "Class offerings"; }
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 mb-0">@ViewData["Title"]</h1>
+    <a asp-action="Create" class="btn btn-primary">New class</a>
+    <a asp-controller="Enrollments" asp-action="Bulk" class="btn btn-outline-primary">Bulk enroll</a>
+</div>
+
+@if (TempData["Success"] is string ok)
+{
+    <div class="alert alert-success">@ok</div>
+}
+
+@if (Model.TermLabel is null)
+{
+    <div class="alert alert-warning">There is no current term. Set one under Terms first.</div>
+}
+else
+{
+    <p class="text-muted">Current term: <strong>@Model.TermLabel</strong> - @Model.TotalCount class(es)</p>
+
+    <form method="get" class="row g-2 mb-3">
+        <div class="col-auto">
+            <input name="q" value="@Model.Search" class="form-control"
+                   placeholder="Subject, faculty or program" />
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-outline-secondary">Search</button>
+            <a asp-action="Index" class="btn btn-link">Clear</a>
+        </div>
+    </form>
+
+    <table class="table table-sm align-middle">
+        <thead>
+            <tr><th>Section</th><th>Subject</th><th>Faculty</th><th>Attendance</th>
+                <th>Enrolled</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody>
+        @foreach (var c in Model.Items)
+        {
+            <tr>
+                <td>@c.SectionCode</td>
+                <td>@c.SubjectCode <span class="text-muted">@c.SubjectTitle</span></td>
+                <td>@c.Faculty</td>
+                <td>@c.AttendanceMode</td>
+                <td>@c.Enrolled</td>
+                <td>
+                    @if (c.IsActive) { <span class="badge bg-success">Active</span> }
+                    else { <span class="badge bg-secondary">Inactive</span> }
+                </td>
+
+                <td>
+                    <a asp-controller="Enrollments" asp-action="Roster" asp-route-id="@c.Id"
+                       class="btn btn-sm btn-outline-primary">Roster</a>
+                    <a asp-action="Status" asp-route-id="@c.Id"
+                       class="btn btn-sm @(c.IsActive ? "btn-outline-danger" : "btn-outline-success")">
+                        @(c.IsActive ? "Deactivate" : "Reactivate")
+                    </a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <nav class="d-flex gap-2 align-items-center">
+        @if (Model.Page > 1)
+        {
+            <a class="btn btn-sm btn-outline-secondary" asp-action="Index"
+               asp-route-q="@Model.Search" asp-route-page="@(Model.Page - 1)">Previous</a>
+        }
+        <span>Page @Model.Page of @Model.TotalPages</span>
+        @if (Model.Page < Model.TotalPages)
+        {
+            <a class="btn btn-sm btn-outline-secondary" asp-action="Index"
+               asp-route-q="@Model.Search" asp-route-page="@(Model.Page + 1)">Next</a>
+        }
+    </nav>
+}

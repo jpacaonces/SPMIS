@@ -1,0 +1,117 @@
+﻿@using Spmis.Web.Data.Auth
+@model Spmis.Web.Models.Admin.UserCreateViewModel
+@{
+    ViewData["Title"] = "New user";
+}
+
+<h1 class="h3 mb-3">New user</h1>
+
+<form asp-action="Create" method="post" class="col-lg-6">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="Role" class="form-label"></label>
+        <select asp-for="Role" class="form-select">
+            <option value="">Choose a role...</option>
+            @foreach (var r in RoleNames.All)
+            {
+                <option value="@r" selected="@(Model.Role == r)">@r</option>
+            }
+        </select>
+        <span asp-validation-for="Role" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" autocomplete="off" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label asp-for="FirstName" class="form-label"></label>
+            <input asp-for="FirstName" class="form-control" />
+            <span asp-validation-for="FirstName" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="MiddleName" class="form-label"></label>
+            <input asp-for="MiddleName" class="form-control" />
+            <span asp-validation-for="MiddleName" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="LastName" class="form-label"></label>
+            <input asp-for="LastName" class="form-control" />
+            <span asp-validation-for="LastName" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="mb-3" data-role-section="Student">
+        <label asp-for="StudentNo" class="form-label"></label>
+        <input asp-for="StudentNo" class="form-control" />
+        <span asp-validation-for="StudentNo" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3" data-role-section="Student,ProgramHead">
+        <label asp-for="ProgramId" class="form-label"></label>
+        <select asp-for="ProgramId" class="form-select">
+            <option value="">Choose a program...</option>
+            @foreach (var p in Model.Programs)
+            {
+                <option value="@p.Id" selected="@(Model.ProgramId == p.Id)">@p.Label</option>
+            }
+        </select>
+        <span asp-validation-for="ProgramId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3" data-role-section="Faculty">
+        <label asp-for="EmployeeNo" class="form-label"></label>
+        <input asp-for="EmployeeNo" class="form-control" />
+        <span asp-validation-for="EmployeeNo" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3" data-role-section="Faculty">
+        <label asp-for="DepartmentId" class="form-label"></label>
+        <select asp-for="DepartmentId" class="form-select">
+            <option value="">Choose a department...</option>
+            @foreach (var d in Model.Departments)
+            {
+                <option value="@d.Id" selected="@(Model.DepartmentId == d.Id)">@d.Label</option>
+            }
+        </select>
+        <span asp-validation-for="DepartmentId" class="text-danger"></span>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label asp-for="Password" class="form-label"></label>
+            <input asp-for="Password" class="form-control" autocomplete="new-password" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="ConfirmPassword" class="form-label"></label>
+            <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
+            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+        </div>
+    </div>
+    <p class="form-text">At least 8 characters with an uppercase letter, a lowercase letter and a digit. Give it to the user in person.</p>
+
+    <button type="submit" class="btn btn-primary">Create account</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Convenience only: shows the fields that belong to the chosen role.
+        // The server decides what is required, whatever the browser does.
+        function syncRoleSections() {
+            var role = document.getElementById('Role').value;
+            document.querySelectorAll('[data-role-section]').forEach(function (el) {
+                var roles = el.getAttribute('data-role-section').split(',');
+                el.classList.toggle('d-none', roles.indexOf(role) === -1);
+            });
+        }
+        document.getElementById('Role').addEventListener('change', syncRoleSections);
+        syncRoleSections();
+    </script>
+}

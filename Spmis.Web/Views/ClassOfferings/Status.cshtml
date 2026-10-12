@@ -1,0 +1,42 @@
+﻿@model Spmis.Web.Models.Admin.ClassOfferingStatusViewModel
+@{
+    var deactivating = !Model.Activate;
+    ViewData["Title"] = deactivating ? "Deactivate class" : "Reactivate class";
+}
+
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+
+<dl class="row">
+    <dt class="col-sm-2">Class</dt><dd class="col-sm-10">@Model.Label</dd>
+    <dt class="col-sm-2">Status</dt>
+    <dd class="col-sm-10">@(Model.IsActive ? "Active" : "Inactive")</dd>
+</dl>
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+@if (Model.Blocker is not null)
+{
+    <div class="alert alert-danger">@Model.Blocker</div>
+}
+
+<p>Nothing is deleted. Scores, attendance and enrollments stay on record, and the class can be reactivated later.</p>
+
+<form id="classForm" asp-action="Status" method="post">
+    <input type="hidden" name="ClassOfferingId" value="@Model.ClassOfferingId" />
+    <input type="hidden" name="Activate" value="@(Model.Activate ? "true" : "false")" />
+
+    <button type="button"
+            class="btn @(deactivating ? "btn-danger" : "btn-success")"
+            data-bs-toggle="modal" data-bs-target="#reasonModal"
+            disabled="@(Model.Blocker is not null)">
+        @(deactivating ? "Deactivate class" : "Reactivate class")
+    </button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Back to classes</a>
+</form>
+
+@await Component.InvokeAsync("ReasonDialog", new
+{
+    context = deactivating ? "Deactivate" : "Reactivate",
+    formId = "classForm",
+    selected = Model.Reason
+})

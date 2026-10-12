@@ -1,0 +1,60 @@
+﻿@model Spmis.Web.Models.Admin.ClassOfferingCreateViewModel
+@{ ViewData["Title"] = "New class"; }
+
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+
+@if (Model.TermLabel is null)
+{
+    <div class="alert alert-warning">There is no current term. Set one under Terms first.</div>
+}
+else
+{
+    <p class="text-muted">This class will be created in the current term: <strong>@Model.TermLabel</strong>.
+        The default grading template is copied into it.</p>
+
+    <form asp-action="Create" method="post" style="max-width:560px">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="SectionId" class="form-label"></label>
+            <select asp-for="SectionId" asp-items="Model.Sections" class="form-select">
+                <option value="">Select...</option>
+            </select>
+            <span asp-validation-for="SectionId" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="SubjectId" class="form-label"></label>
+            <select asp-for="SubjectId" asp-items="Model.Subjects" class="form-select">
+                <option value="">Select...</option>
+            </select>
+            <span asp-validation-for="SubjectId" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="FacultyId" class="form-label"></label>
+            <select asp-for="FacultyId" asp-items="Model.FacultyOptions" class="form-select">
+                <option value="">Select...</option>
+            </select>
+            <span asp-validation-for="FacultyId" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="TransmutationTableId" class="form-label"></label>
+            <select asp-for="TransmutationTableId" asp-items="Model.Tables" class="form-select">
+                <option value="">Select...</option>
+            </select>
+            <span asp-validation-for="TransmutationTableId" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="AttendanceMode" class="form-label"></label>
+            <select asp-for="AttendanceMode" class="form-select">
+                <option value="Meetings">Meetings</option>
+                <option value="ActivityBased">Activity based</option>
+            </select>
+            <span asp-validation-for="AttendanceMode" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create class</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+    </form>
+}
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

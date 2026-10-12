@@ -1,0 +1,59 @@
+﻿@model Spmis.Web.Models.Admin.UserStatusViewModel
+@{
+    var deactivating = Model.IsActive;
+    ViewData["Title"] = deactivating ? "Deactivate account" : "Reactivate account";
+}
+
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+
+<dl class="row">
+    <dt class="col-sm-2">Name</dt>
+    <dd class="col-sm-10">@Model.FullName</dd>
+    <dt class="col-sm-2">Email</dt>
+    <dd class="col-sm-10">@Model.Email</dd>
+    <dt class="col-sm-2">Role</dt>
+    <dd class="col-sm-10">@string.Join(", ", Model.Roles)</dd>
+    <dt class="col-sm-2">Status</dt>
+    <dd class="col-sm-10">@(Model.IsActive ? "Active" : "Inactive")</dd>
+</dl>
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+@if (Model.Blocker is not null)
+{
+    <div class="alert alert-danger">@Model.Blocker</div>
+}
+
+@foreach (var warning in Model.Warnings)
+{
+    <div class="alert alert-warning">@warning</div>
+}
+
+@if (deactivating)
+{
+    <p>The account will no longer be able to sign in. Nothing is deleted, and it can be reactivated later.</p>
+}
+else
+{
+    <p>The account will be able to sign in again.</p>
+}
+
+<form id="statusForm" asp-action="Status" method="post">
+    <input type="hidden" name="UserId" value="@Model.UserId" />
+    <input type="hidden" name="Action" value="@(deactivating ? "deactivate" : "reactivate")" />
+
+    <button type="button"
+            class="btn @(deactivating ? "btn-danger" : "btn-success")"
+            data-bs-toggle="modal" data-bs-target="#reasonModal"
+            disabled="@(Model.Blocker is not null)">
+        @(deactivating ? "Deactivate account" : "Reactivate account")
+    </button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Back to users</a>
+</form>
+
+@await Component.InvokeAsync("ReasonDialog", new
+{
+    context = deactivating ? "Deactivate" : "Reactivate",
+    formId = "statusForm",
+    selected = Model.Reason
+})

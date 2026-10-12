@@ -1,0 +1,40 @@
+﻿@model Spmis.Web.Models.ClassRecord.AssessmentStatusViewModel
+@{
+    var deactivating = !Model.Activate;
+    ViewData["Title"] = deactivating ? "Deactivate assessment" : "Reactivate assessment";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<dl class="row">
+    <dt class="col-sm-2">Title</dt><dd class="col-sm-10">@Model.Title</dd>
+    <dt class="col-sm-2">Period</dt><dd class="col-sm-10">@Model.PeriodName</dd>
+    <dt class="col-sm-2">Component</dt><dd class="col-sm-10">@Model.ComponentName</dd>
+    <dt class="col-sm-2">Score rows</dt><dd class="col-sm-10">@Model.ScoreRows</dd>
+    <dt class="col-sm-2">Status</dt><dd class="col-sm-10">@(Model.IsActive ? "Active" : "Inactive")</dd>
+</dl>
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+@if (deactivating)
+{
+    <p>An inactive assessment is left out of every student's grade. Nothing is deleted and it can be reactivated.</p>
+}
+
+<form id="assessmentForm" asp-action="Status" method="post">
+    <input type="hidden" name="AssessmentId" value="@Model.AssessmentId" />
+    <input type="hidden" name="Activate" value="@(Model.Activate ? "true" : "false")" />
+
+    <button type="button" class="btn @(deactivating ? "btn-danger" : "btn-success")"
+            data-bs-toggle="modal" data-bs-target="#reasonModal">
+        @(deactivating ? "Deactivate" : "Reactivate")
+    </button>
+    <a asp-action="Index" asp-route-id="@Model.ClassOfferingId" class="btn btn-outline-secondary">Back</a>
+</form>
+
+@await Component.InvokeAsync("ReasonDialog", new
+{
+    context = deactivating ? "Deactivate" : "Reactivate",
+    formId = "assessmentForm",
+    selected = Model.Reason
+})

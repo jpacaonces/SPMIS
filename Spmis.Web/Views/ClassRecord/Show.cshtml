@@ -1,0 +1,101 @@
+﻿@using Spmis.Web.Grading
+@model Spmis.Web.Models.ClassRecord.ClassRecordViewModel
+@{
+    ViewData["Title"] = $"{Model.SectionCode} - {Model.SubjectCode}";
+    var students = Model.Sheet.Students;
+    var periods = students.FirstOrDefault()?.Semester.Periods;
+
+    string PeriodLabel(string code) => code switch
+    {
+        "PRELIM" => "Prelim",
+        "MIDTERM" => "Midterm",
+        "PREFINAL" => "Pre-Final",
+        "FINAL" => "Final",
+        _ => code
+    };
+}
+
+<h1 class="h3 mb-1">@Model.SectionCode - @Model.SubjectCode</h1>
+<p class="text-muted mb-3">
+    @Model.SubjectTitle - @Model.TermLabel - Class Standing @Model.ClassStandingWeight.ToString("0.##")% /
+    Major Exam @Model.MajorExamWeight.ToString("0.##")% - Attendance: @Model.AttendanceMode -
+    @students.Count student(s)
+</p>
+
+@if (students.Count == 0)
+{
+    <div class="alert alert-info">No students are enrolled in this class.</div>
+}
+else
+{
+    <div class="table-responsive">
+    <table class="table table-sm table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Student no.</th>
+                <th>Name</th>
+                @foreach (var p in periods!)
+                {
+                    <th class="text-end">@PeriodLabel(p.Code)</th>
+                }
+                <th class="text-end">Semester</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var s in students)
+        {
+            <tr>
+                <td>@s.StudentNo</td>
+                <td>@s.Name</td>
+                @foreach (var p in s.Semester.Periods)
+                {
+                    <td class="text-end">
+                        @if (p.RawGrade is null)
+                        {
+                            <span class="text-muted">-</span>
+                        }
+                        else if (p.Status == PeriodStatus.Provisional)
+                        {
+                            <span class="text-warning" title="Class Standing only: no Major Exam scored yet">
+                                @p.RawGrade.Value.ToString("0.00") est.
+                            </span>
+                        }
+                        else
+                        {
+                            @p.RawGrade.Value.ToString("0.00")
+                        }
+                    </td>
+                }
+                <td class="text-end">
+                    @if (s.Semester.RawGrade is null)
+                    {
+                        <span class="text-muted">-</span>
+                    }
+                    else
+                    {
+                        <strong class="@(s.Semester.IsPassing == false ? "text-danger" : "")">
+                            @s.Semester.ReportedGrade!.Value.ToString("0.00")
+                        </strong>
+                        <span class="text-muted small">(@s.Semester.RawGrade.Value.ToString("0.00"))</span>
+                        @if (s.Semester.Status == SemesterStatus.Provisional)
+                        {
+                            <span class="badge bg-warning text-dark">Provisional</span>
+                        }
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    </div>
+
+    <p class="small text-muted">
+        <strong>est.</strong> = Class Standing only (no Major Exam scored yet).
+        <strong>Provisional</strong> = not all four periods are complete, so the semester grade can still change.
+        The number in brackets is the raw grade before transmutation.
+    </p>
+}
+
+<a asp-action="Index" class="btn btn-outline-secondary">Back to my classes</a>
+<a class="btn btn-outline-primary" asp-controller="Assessments" asp-action="Index"
+   asp-route-id="@Model.ClassOfferingId">Assessments</a>

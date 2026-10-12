@@ -1,0 +1,53 @@
+﻿@model Spmis.Web.Models.Admin.EnrollmentStatusViewModel
+@{
+    var dropping = Model.NewStatus == "Dropped";
+    ViewData["Title"] = dropping ? "Drop student" : "Reinstate student";
+}
+
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+
+<dl class="row">
+    <dt class="col-sm-2">Student</dt><dd class="col-sm-10">@Model.StudentLabel</dd>
+    <dt class="col-sm-2">Class</dt><dd class="col-sm-10">@Model.ClassLabel</dd>
+    <dt class="col-sm-2">Status now</dt><dd class="col-sm-10">@Model.CurrentStatus</dd>
+</dl>
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+@if (Model.Blocker is not null)
+{
+    <div class="alert alert-danger">@Model.Blocker</div>
+}
+
+<p>
+    @if (dropping)
+    {
+        <text>The student is marked Dropped. Their scores and attendance stay on record. They can be reinstated later.</text>
+    }
+    else
+    {
+        <text>The student returns to Enrolled and appears in the class record again.</text>
+    }
+</p>
+
+<form id="enrollForm" asp-action="Status" method="post">
+    <input type="hidden" name="EnrollmentId" value="@Model.EnrollmentId" />
+    <input type="hidden" name="ClassOfferingId" value="@Model.ClassOfferingId" />
+    <input type="hidden" name="NewStatus" value="@Model.NewStatus" />
+
+    <button type="button"
+            class="btn @(dropping ? "btn-danger" : "btn-success")"
+            data-bs-toggle="modal" data-bs-target="#reasonModal"
+            disabled="@(Model.Blocker is not null)">
+        @(dropping ? "Drop student" : "Reinstate student")
+    </button>
+    <a asp-action="Roster" asp-route-id="@Model.ClassOfferingId"
+       class="btn btn-outline-secondary">Back to roster</a>
+</form>
+
+@await Component.InvokeAsync("ReasonDialog", new
+{
+    context = "AdminCorrection",
+    formId = "enrollForm",
+    selected = Model.Reason
+})

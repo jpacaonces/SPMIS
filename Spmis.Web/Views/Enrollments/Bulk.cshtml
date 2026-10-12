@@ -1,0 +1,39 @@
+﻿@model Spmis.Web.Models.Admin.BulkEnrollViewModel
+@{ ViewData["Title"] = "Bulk enroll a section"; }
+
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+
+@if (Model.TermLabel is null)
+{
+    <div class="alert alert-warning">There is no current term. Set one under Terms first.</div>
+}
+else
+{
+    <p class="text-muted">
+        Every student listed is enrolled in <strong>all active classes</strong> of the chosen section
+        for <strong>@Model.TermLabel</strong>. Students already enrolled are skipped. If any student number is
+        invalid, nothing is saved.
+    </p>
+
+    <form asp-action="Bulk" method="post" style="max-width:560px">
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="SectionId" class="form-label"></label>
+            <select asp-for="SectionId" asp-items="Model.Sections" class="form-select">
+                <option value="">Select...</option>
+            </select>
+            <span asp-validation-for="SectionId" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="StudentNumbers" class="form-label"></label>
+            <textarea asp-for="StudentNumbers" rows="8" class="form-control"></textarea>
+            <span asp-validation-for="StudentNumbers" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Enroll students</button>
+        <a asp-controller="ClassOfferings" asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+    </form>
+}
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

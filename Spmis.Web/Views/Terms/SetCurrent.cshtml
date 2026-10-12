@@ -1,0 +1,33 @@
+﻿@model Spmis.Web.Models.Admin.TermCurrentViewModel
+@{ ViewData["Title"] = "Change current term"; }
+
+<h1 class="h3 mb-3">@ViewData["Title"]</h1>
+
+<dl class="row">
+    <dt class="col-sm-3">Current term now</dt>
+    <dd class="col-sm-9">@(Model.CurrentLabel ?? "None")</dd>
+    <dt class="col-sm-3">Will become current</dt>
+    <dd class="col-sm-9">@Model.Label</dd>
+</dl>
+
+<div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+<div class="alert alert-warning">
+    This changes which term the Faculty, Student and Program Head screens treat as "this term". The change is logged with your reason.
+</div>
+
+<form id="termForm" asp-action="SetCurrent" method="post">
+    <input type="hidden" name="TermId" value="@Model.TermId" />
+    <button type="button" class="btn btn-primary"
+            data-bs-toggle="modal" data-bs-target="#reasonModal">
+        Make @Model.Label the current term
+    </button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+</form>
+
+@await Component.InvokeAsync("ReasonDialog", new
+{
+    context = "AdminCorrection",
+    formId = "termForm",
+    selected = Model.Reason
+})
