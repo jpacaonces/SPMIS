@@ -22,7 +22,13 @@
 
                 <div class="mb-3">
                     <label asp-for="Password" class="form-label">Password</label>
-                    <input asp-for="Password" class="form-control" autocomplete="current-password" />
+                    <div class="input-group">
+                        <input asp-for="Password" class="form-control" autocomplete="current-password" />
+                        <button type="button" id="togglePassword" class="btn btn-outline-secondary"
+                                aria-label="Show password" aria-pressed="false">
+                            Show
+                        </button>
+                    </div>
                     <span asp-validation-for="Password" class="text-danger small"></span>
                 </div>
 
@@ -30,6 +36,22 @@
                     <input asp-for="RememberMe" class="form-check-input" />
                     <label asp-for="RememberMe" class="form-check-label">Keep me signed in</label>
                 </div>
+
+                @section Scripts {
+                    <script>
+                                        const pwd = document.getElementById("Password");
+                                        const toggle = document.getElementById("togglePassword");
+
+                                        toggle.addEventListener("click", () => {
+                                            const showing = pwd.type === "text";
+                                            pwd.type = showing ? "password" : "text";
+                                            toggle.textContent = showing ? "Show" : "Hide";
+                                            toggle.setAttribute("aria-pressed", String(!showing));
+                                            toggle.setAttribute("aria-label", showing ? "Show password" : "Hide password");
+                                            pwd.focus();
+                                        });
+                    </script>
+                }
 
                 <button type="submit" class="btn btn-primary w-100">Sign in</button>
             </form>

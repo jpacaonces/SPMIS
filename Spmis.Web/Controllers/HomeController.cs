@@ -10,16 +10,18 @@ public class HomeController : Controller
 {
     public IActionResult Index()
     {
-        if (User.IsInRole(RoleNames.Administrator))
-            return RedirectToAction("Index", "Admin");
-        if (User.IsInRole(RoleNames.ProgramHead))
-            return RedirectToAction("Index", "ProgramHead");
-        if (User.IsInRole(RoleNames.Faculty))
-            return RedirectToAction("Index", "Faculty");
-        if (User.IsInRole(RoleNames.Student))
-            return RedirectToAction("Index", "Student");
+        // The tiles page decides what to show per role. A signed-in user
+        // with no known role is still turned away.
+        var hasKnownRole =
+            User.IsInRole(RoleNames.Administrator) ||
+            User.IsInRole(RoleNames.ProgramHead) ||
+            User.IsInRole(RoleNames.Faculty) ||
+            User.IsInRole(RoleNames.Student);
 
-        return RedirectToAction("AccessDenied", "Account");
+        if (!hasKnownRole)
+            return RedirectToAction("AccessDenied", "Account");
+
+        return View();
     }
 
     public IActionResult Privacy()

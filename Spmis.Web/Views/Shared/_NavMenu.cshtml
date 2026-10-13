@@ -1,52 +1,11 @@
-﻿@using Spmis.Web.Data.Auth
-
-@if (User.Identity?.IsAuthenticated == true)
+﻿@if (User.Identity?.IsAuthenticated == true)
 {
-    <ul class="navbar-nav flex-grow-1">
-        @if (User.IsInRole(RoleNames.Administrator))
-        {
-            <li class="nav-item">
-                <a class="nav-link text-dark" asp-controller="Admin" asp-action="Index">Administration</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-dark" asp-controller="Users" asp-action="Index">Users</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-dark" asp-controller="AuditLog" asp-action="Index">Audit log</a>
-            </li>
-            <li class="nav-item"><a class="nav-link" asp-controller="Terms" asp-action="Index">Terms</a></li>
-            <li class="nav-item"><a class="nav-link" asp-controller="Programs" asp-action="Index">Programs</a></li>
-            <li class="nav-item"><a class="nav-link" asp-controller="Subjects" asp-action="Index">Subjects</a></li>
-            <li class="nav-item"><a class="nav-link" asp-controller="Sections" asp-action="Index">Sections</a></li>
-            <li class="nav-item"><a class="nav-link" asp-controller="ClassOfferings" asp-action="Index">Classes</a></li>
-        }
-        @if (User.IsInRole(RoleNames.ProgramHead))
-        {
-            <li class="nav-item">
-                <a class="nav-link text-dark" asp-controller="ProgramHead" asp-action="Index">Program Head</a>
-            </li>
-            <li class="nav-item"><a class="nav-link" asp-controller="Analytics" asp-action="Index">Program overview</a></li>
-        }
-        @if (User.IsInRole(RoleNames.Faculty))
-        {
-            <li class="nav-item">
-                <a class="nav-link text-dark" asp-controller="Faculty" asp-action="Index">My Classes</a>
-            </li>
-            <li class="nav-item"><a class="nav-link" asp-controller="Excuses" asp-action="Index">Excuse letters</a></li>
-            <li class="nav-item"><a class="nav-link" asp-controller="ClassRecord" asp-action="Index">My classes</a></li>
-        }
-        @if (User.IsInRole(RoleNames.Student))
-        {
-            <li class="nav-item">
-                <a class="nav-link text-dark" asp-controller="Student" asp-action="Index">My Grades</a>
-            </li>
-            <li class="nav-item"><a class="nav-link" asp-controller="MyGrades" asp-action="Index">My grades</a></li>
-            <li class="nav-item"><a class="nav-link" asp-controller="MyExcuses" asp-action="Index">Excuse letters</a></li>
-        }
-    </ul>
+    @* Navigation lives on the Home tiles page. This spacer keeps the
+       user name and Sign out pushed to the right of the bar. *@
+    <div class="flex-grow-1"></div>
 
     <form asp-controller="Account" asp-action="Logout" method="post" class="d-flex align-items-center">
         <span class="navbar-text me-3">@User.Identity.Name</span>
-        <button type="submit" class="btn btn-outline-secondary btn-sm">Sign out</button>
+        <button type="submit" class="btn btn-outline-light btn-sm">Sign out</button>
     </form>
 }
